@@ -1,0 +1,6 @@
+
+option('arch', type: 'string', value: '', yield : true,
+       description: 'Set compiler option -march=<value>.')
+
+option('lto', type: 'boolean', value: false,
+       description: 'Enable link-time optimisation.')
