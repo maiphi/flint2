@@ -8,11 +8,14 @@ project(
     'c_std=c11',
     'buildtype=release',
     'default_library=shared',
-    'warning_level=0'])
+    'warning_level=1'])
 
 if get_option('arch') != ''
   add_project_arguments('-march=' + get_option('arch'), language : 'c')
 endif
+
+# warning_level=0 doesn't exist in old Meson versions
+override_warning_level = 'warning_level=1'
 
 c_compiler = meson.get_compiler('c')
 
@@ -107,7 +110,7 @@ generated_headers_install = [config_h, fft_tuning_h, fmpz_conversions_h]
 generated_headers_noinstall = [cpimport_h]
 generated_headers = generated_headers_install + generated_headers_noinstall
 
-compiler_options = ['-funroll-loops', '-mpopcnt']
+compiler_options = ['-Wno-unused-but-set-variable', '-funroll-loops', '-mpopcnt']
 if get_option('lto')
   compiler_options += '-flto'
 endif
@@ -150,7 +153,7 @@ flint = shared_library(
     src,
     link_whole : subdir_static_libs,
     dependencies : deps,
-    override_options : ['warning_level=0'],
+    override_options : [override_warning_level],
     install : true)
 
 pkg = import('pkgconfig')

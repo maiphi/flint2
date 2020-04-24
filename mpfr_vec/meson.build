@@ -11,5 +11,5 @@ mpfr_vec = static_library(
   'mpfr_vec',
   src_mpfr_vec,
   include_directories : include_dir,
-  override_options : ['warning_level=0'],
+  override_options : [override_warning_level],
   install : false)

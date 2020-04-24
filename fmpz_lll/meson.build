@@ -11,5 +11,5 @@ fmpz_lll = static_library(
   'fmpz_lll',
   src_fmpz_lll,
   include_directories : include_dir,
-  override_options : ['warning_level=0'],
+  override_options : [override_warning_level],
   install : false)

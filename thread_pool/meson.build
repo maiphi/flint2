@@ -11,5 +11,5 @@ thread_pool = static_library(
   'thread_pool',
   src_thread_pool,
   include_directories : include_dir,
-  override_options : ['warning_level=0'],
+  override_options : [override_warning_level],
   install : false)

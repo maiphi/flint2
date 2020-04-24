@@ -11,5 +11,5 @@ d_vec = static_library(
   'd_vec',
   src_d_vec,
   include_directories : include_dir,
-  override_options : ['warning_level=0'],
+  override_options : [override_warning_level],
   install : false)

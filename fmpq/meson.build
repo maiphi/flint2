@@ -11,5 +11,5 @@ fmpq = static_library(
   'fmpq',
   src_fmpq,
   include_directories : include_dir,
-  override_options : ['warning_level=0'],
+  override_options : [override_warning_level],
   install : false)

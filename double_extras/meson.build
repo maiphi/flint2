@@ -11,5 +11,5 @@ double_extras = static_library(
   'double_extras',
   src_double_extras,
   include_directories : include_dir,
-  override_options : ['warning_level=0'],
+  override_options : [override_warning_level],
   install : false)
