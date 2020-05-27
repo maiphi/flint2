@@ -19,7 +19,7 @@ override_warning_level = 'warning_level=1'
 
 c_compiler = meson.get_compiler('c')
 
-deps = [dependency('zlib'), dependency('mpfr'), dependency('threads')]
+deps = [dependency('zlib'), dependency('threads')]
 
 # On some systems, gmp doesn't provide a pkg-config file.
 gmp_dep = dependency('gmp', required : false)
@@ -27,6 +27,12 @@ if not gmp_dep.found()
   gmp_dep = c_compiler.find_library('gmp', required : true)
 endif
 deps += gmp_dep
+# The same with mpfr.
+mpfr_dep = dependency('mpfr', required : false)
+if not mpfr_dep.found()
+  mpfr_dep = c_compiler.find_library('mpfr', required : true)
+endif
+deps += mpfr_dep
 
 m_dep = c_compiler.find_library('m', required : false)
 if m_dep.found()
