@@ -116,7 +116,9 @@ if get_option('lto')
 endif
 # -fno-fat-lto-objects for gcc is the default, if supported.
 add_project_arguments('-Dflint_EXPORTS', language : 'c')
-add_project_arguments('-DNDEBUG', language : 'c')
+if not get_option('buildtype').startswith('debug')
+  add_project_arguments('-DNDEBUG', language : 'c')
+endif
 foreach opt : compiler_options
   if c_compiler.has_argument(opt)
     add_project_arguments(opt, language : 'c')
@@ -143,18 +145,35 @@ endforeach
 subdir('include/flint')
 
 # Make sure the headers are copied to include/flint.
+# If FLINT is built as a subproject, we need to copy the headers
+# to include/flint in the build directory, so that the superproject
+# finds them before they are installed.
 src += header_copies
 src += generated_headers_noinstall
 
 subdir_static_libs = [aprcl, ulong_extras, long_extras, perm, fmpz, fmpz_vec, fmpz_poly, fmpq_poly, fmpz_mat, fmpz_lll, mpfr_vec, mpfr_mat, mpf_vec, mpf_mat, nmod_vec, nmod_poly, nmod_poly_factor, arith, mpn_extras, nmod_mat, fmpq, fmpq_vec, fmpq_mat, padic, fmpz_poly_q, fmpz_poly_mat, nmod_poly_mat, fmpz_mod_poly, fmpz_mod_mat, fmpz_mod_poly_factor, fmpz_factor, fmpz_poly_factor, fft, qsieve, double_extras, d_vec, d_mat, padic_poly, padic_mat, qadic, fq, fq_vec, fq_mat, fq_poly, fq_poly_factor, fq_nmod, fq_nmod_vec, fq_nmod_mat, fq_nmod_poly, fq_nmod_poly_factor, fq_zech, fq_zech_vec, fq_zech_mat, fq_zech_poly, fq_zech_poly_factor, thread_pool, fmpz_mod, mpoly, fmpz_mpoly, fmpq_mpoly, nmod_mpoly, fq_nmod_mpoly, fmpz_mod_mpoly, flintxx, fq_vec_templates, fq_mat_templates, fq_poly_templates, fq_poly_factor_templates, fq_templates]
 
-flint = shared_library(
+if get_option('longcmdhack')
+  flint = shared_library(
     'flint',
     src,
     link_whole : subdir_static_libs,
     dependencies : deps,
     override_options : [override_warning_level],
     install : true)
+else
+  subdir_objects = []
+  foreach subdirlib : subdir_static_libs
+    subdir_objects += subdirlib.extract_all_objects()
+  endforeach
+  flint = library(
+    'flint',
+    src,
+    objects : subdir_objects,
+    dependencies : deps,
+    override_options : [override_warning_level],
+    install : true)
+endif
 
 pkg = import('pkgconfig')
 pkg.generate(
