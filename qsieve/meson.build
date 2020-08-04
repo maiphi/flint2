@@ -1,5 +1,5 @@
 
-src_qsieve = files(['block_lanczos.c', 'clear.c', 'collect_relations.c', 'compute_poly_data.c', 'factor.c', 'init.c', 'knuth_schroeppel.c', 'large_prime_variant.c', 'linalg_clear.c', 'linalg_init.c', 'poly_clear.c', 'poly_init.c', 'primes_init.c', 'square_root.c'])
+src_qsieve = files(['block_lanczos.c', 'clear.c', 'compute_poly_data.c', 'init.c', 'knuth_schroeppel.c', 'large_prime_variant.c', 'linalg_clear.c', 'linalg_init.c', 'poly_clear.c', 'poly_init.c', 'primes_init.c', 'square_root.c', 'collect_relations.c', 'factor.c'])
 
 headers += files([])
 

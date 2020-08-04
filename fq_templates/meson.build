@@ -1,5 +1,5 @@
 
-src_fq_templates = files(['div.c', 'is_invertible.c', 'is_invertible_f.c', 'multiplicative_order.c'])
+src_fq_templates = files(['div.c', 'is_invertible.c', 'is_invertible_f.c', 'multiplicative_order.c', 'is_square.c', 'sqrt.c'])
 
 headers += files([])
 

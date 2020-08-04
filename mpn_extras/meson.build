@@ -1,5 +1,5 @@
 
-src_mpn_extras = files(['debug.c', 'divides.c', 'divrem_preinv1.c', 'divrem_preinvn.c', 'factor_trial.c', 'factor_trial_tree.c', 'fmms1.c', 'gcd_full.c', 'mod_preinvn.c', 'mulmod_2expp1_basecase.c', 'mulmod_preinv1.c', 'mulmod_preinvn.c', 'preinv1.c', 'preinvn.c', 'remove_2exp.c', 'remove_power.c'])
+src_mpn_extras = files(['debug.c', 'divides.c', 'divrem_preinvn.c', 'factor_trial.c', 'gcd_full.c', 'mod_preinvn.c', 'mulmod_2expp1_basecase.c', 'mulmod_preinvn.c', 'preinv1.c', 'preinvn.c', 'remove_2exp.c', 'remove_power.c', 'divrem_preinv1.c', 'factor_trial_tree.c', 'fmms1.c', 'mulmod_preinv1.c'])
 
 headers += files([])
 

@@ -125,7 +125,7 @@ conf_data.set('HAVE_TLS', 1)
 conf_data.set10('HAVE_CPU_SET_T', build_machine.system() == 'linux')
 conf_data.set('FLINT_REENTRANT', 1)
 conf_data.set('FLINT_DLL', true)
-config_h = configure_file(output : 'config.h', configuration : conf_data)
+config_h = configure_file(output : 'flint-config.h', configuration : conf_data)
 
 if c_compiler.sizeof('void *') == 8
   bits = '64'
