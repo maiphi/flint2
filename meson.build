@@ -127,7 +127,7 @@ foreach opt : compiler_options
     add_project_arguments(opt, language : 'c')
   endif
 endforeach
-if '-flto' in compiler_options and c_compiler.has_link_argument('-flto')
+if compiler_options.contains('-flto') and c_compiler.has_link_argument('-flto')
   add_project_link_arguments('-flto', language : 'c')
 endif
 
