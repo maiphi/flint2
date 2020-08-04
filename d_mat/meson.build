@@ -1,15 +1,17 @@
 
-src_d_mat = ['approx_equal.c', 'clear.c', 'equal.c', 'gso.c', 'init.c', 'inlines.c', 'is_approx_zero.c', 'is_zero.c', 'mul_classical.c', 'one.c', 'print.c', 'qr.c', 'randtest.c', 'set.c', 'swap.c', 'transpose.c', 'zero.c']
+src_d_mat = files(['approx_equal.c', 'clear.c', 'equal.c', 'gso.c', 'init.c', 'inlines.c', 'is_approx_zero.c', 'is_zero.c', 'mul_classical.c', 'one.c', 'print.c', 'qr.c', 'randtest.c', 'set.c', 'swap.c', 'transpose.c', 'zero.c'])
 
-src_d_mat += generated_headers
+headers += files([])
 
-headers_d_mat = files([])
-
-headers += headers_d_mat
-
-d_mat = static_library(
-  'd_mat',
-  src_d_mat,
-  include_directories : include_dir,
-  override_options : [override_warning_level],
-  install : false)
+if meson.version().version_compare('>=0.55.0')
+  src += src_d_mat
+else
+  src_d_mat += generated_headers
+  d_mat = static_library(
+    'd_mat',
+    src_d_mat,
+    include_directories : include_dir,
+    override_options : [override_warning_level],
+    install : false)
+  subdir_static_libs += d_mat
+endif

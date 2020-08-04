@@ -1,15 +1,17 @@
 
-src_fq_templates = ['div.c', 'is_invertible.c', 'is_invertible_f.c', 'multiplicative_order.c']
+src_fq_templates = files(['div.c', 'is_invertible.c', 'is_invertible_f.c', 'multiplicative_order.c'])
 
-src_fq_templates += generated_headers
+headers += files([])
 
-headers_fq_templates = files([])
-
-headers += headers_fq_templates
-
-fq_templates = static_library(
-  'fq_templates',
-  src_fq_templates,
-  include_directories : include_dir,
-  override_options : [override_warning_level],
-  install : false)
+if meson.version().version_compare('>=0.55.0')
+  src += src_fq_templates
+else
+  src_fq_templates += generated_headers
+  fq_templates = static_library(
+    'fq_templates',
+    src_fq_templates,
+    include_directories : include_dir,
+    override_options : [override_warning_level],
+    install : false)
+  subdir_static_libs += fq_templates
+endif

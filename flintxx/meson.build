@@ -1,15 +1,17 @@
 
-src_flintxx = ['dummy.c']
+src_flintxx = files(['dummy.c'])
 
-src_flintxx += generated_headers
+headers += files(['default_rules.h', 'evaluation_tools.h', 'expression.h', 'expression_traits.h', 'flint_classes.h', 'flint_exception.h', 'forwarding.h', 'frandxx.h', 'ltuple.h', 'matrix.h', 'mp.h', 'rules.h', 'stdmath.h', 'traits.h', 'traits_fwd.h', 'tuple.h', 'vector.h'])
 
-headers_flintxx = files(['default_rules.h', 'evaluation_tools.h', 'expression.h', 'expression_traits.h', 'flint_classes.h', 'flint_exception.h', 'forwarding.h', 'frandxx.h', 'ltuple.h', 'matrix.h', 'mp.h', 'rules.h', 'stdmath.h', 'traits.h', 'traits_fwd.h', 'tuple.h', 'vector.h'])
-
-headers += headers_flintxx
-
-flintxx = static_library(
-  'flintxx',
-  src_flintxx,
-  include_directories : include_dir,
-  override_options : [override_warning_level],
-  install : false)
+if meson.version().version_compare('>=0.55.0')
+  src += src_flintxx
+else
+  src_flintxx += generated_headers
+  flintxx = static_library(
+    'flintxx',
+    src_flintxx,
+    include_directories : include_dir,
+    override_options : [override_warning_level],
+    install : false)
+  subdir_static_libs += flintxx
+endif

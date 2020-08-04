@@ -1,4 +1,82 @@
+#!/usr/bin/env python3
 
+# BUILD_DIRS, TEMPLATE_DIRS, SOURCES from FLINT's CMakeLists.txt
+
+build_dirs = [
+    'aprcl', 'ulong_extras', 'long_extras', 'perm', 'fmpz', 'fmpz_vec',
+    'fmpz_poly', 'fmpq_poly', 'fmpz_mat', 'fmpz_lll', 'mpfr_vec', 'mpfr_mat',
+    'mpf_vec', 'mpf_mat', 'nmod_vec', 'nmod_poly', 'nmod_poly_factor', 'arith',
+    'mpn_extras', 'nmod_mat', 'fmpq', 'fmpq_vec', 'fmpq_mat', 'padic',
+    'fmpz_poly_q', 'fmpz_poly_mat', 'nmod_poly_mat', 'fmpz_mod_poly',
+    'fmpz_mod_mat', 'fmpz_mod_poly_factor', 'fmpz_factor', 'fmpz_poly_factor',
+    'fft', 'qsieve', 'double_extras', 'd_vec', 'd_mat', 'padic_poly',
+    'padic_mat', 'qadic', 'fq', 'fq_vec', 'fq_mat', 'fq_poly', 'fq_poly_factor',
+    'fq_nmod', 'fq_nmod_vec', 'fq_nmod_mat', 'fq_nmod_poly',
+    'fq_nmod_poly_factor', 'fq_zech', 'fq_zech_vec', 'fq_zech_mat',
+    'fq_zech_poly', 'fq_zech_poly_factor', 'thread_pool', 'fmpz_mod', 'mpoly',
+    'fmpz_mpoly', 'fmpq_mpoly', 'nmod_mpoly', 'fq_nmod_mpoly', 'fmpz_mod_mpoly',
+    'flintxx']
+
+template_dirs = [
+    'fq_vec_templates', 'fq_mat_templates', 'fq_poly_templates',
+    'fq_poly_factor_templates', 'fq_templates']
+
+sources = [
+    'printf.c', 'fprintf.c', 'sprintf.c', 'scanf.c', 'fscanf.c', 'sscanf.c',
+    'clz_tab.c', 'memory_manager.c', 'version.c', 'profiler.c',
+    'thread_support.c', 'exception.c', 'hashmap.c', 'inlines.c', 'fmpz/fmpz.c']
+
+# The auto-generated file fmpz.c will be added later.
+sources.remove('fmpz/fmpz.c')
+
+# <dirname>/meson.build
+meson_subdir_tmpl = """
+src_{dirname} = files({src})
+
+headers += files({headers})
+
+if meson.version().version_compare('>=0.55.0')
+  src += src_{dirname}
+else
+  src_{dirname} += generated_headers
+  {dirname} = static_library(
+    '{dirname}',
+    src_{dirname},
+    include_directories : include_dir,
+    override_options : [override_warning_level],
+    install : false)
+  subdir_static_libs += {dirname}
+endif
+"""
+
+# include/flint/meson.build
+meson_header = """
+# Copy all header files to include/flint/, so that they can be included
+# as <flint/header.h> before installation when FLINT is built as a subproject.
+
+header_copies = []
+
+if meson.version().version_compare('>=0.47.0')
+  foreach h : headers
+    header_copies += configure_file(
+      input : h,
+      output : '@PLAINNAME@',
+      copy : true)
+  endforeach
+else
+  foreach h : headers
+    empty_conf = configuration_data()
+    header_copies += configure_file(
+      input : h,
+      output : '@PLAINNAME@',
+      configuration : empty_conf)
+  endforeach
+endif
+
+install_headers(header_copies, subdir : 'flint')
+"""
+
+meson_root_tmpl = """
 project(
   'flint',
   'c',
@@ -133,15 +211,15 @@ endif
 
 include_dir = include_directories('.')
 
-src = files(['printf.c', 'fprintf.c', 'sprintf.c', 'scanf.c', 'fscanf.c', 'sscanf.c', 'clz_tab.c', 'memory_manager.c', 'version.c', 'profiler.c', 'thread_support.c', 'exception.c', 'hashmap.c', 'inlines.c'])
+src = files({sources})
 
 src += fmpz_c
 
-headers = files(['NTL-interface.h', 'aprcl.h', 'arith.h', 'arithxx.h', 'd_mat.h', 'd_vec.h', 'double_extras.h', 'exception.h', 'fft.h', 'flint.h', 'flintxx.h', 'fmpq.h', 'fmpq_mat.h', 'fmpq_matxx.h', 'fmpq_mpoly.h', 'fmpq_poly.h', 'fmpq_polyxx.h', 'fmpq_vec.h', 'fmpqxx.h', 'fmpz.h', 'fmpz_factor.h', 'fmpz_factorxx.h', 'fmpz_lll.h', 'fmpz_mat.h', 'fmpz_matxx.h', 'fmpz_mod.h', 'fmpz_mod_mat.h', 'fmpz_mod_mpoly.h', 'fmpz_mod_poly.h', 'fmpz_mod_poly_factor.h', 'fmpz_mod_poly_factorxx.h', 'fmpz_mod_polyxx.h', 'fmpz_mpoly.h', 'fmpz_poly.h', 'fmpz_poly_factor.h', 'fmpz_poly_factorxx.h', 'fmpz_poly_mat.h', 'fmpz_poly_matxx.h', 'fmpz_poly_q.h', 'fmpz_poly_qxx.h', 'fmpz_polyxx.h', 'fmpz_vec.h', 'fmpz_vecxx.h', 'fmpzxx.h', 'fq.h', 'fq_embed.h', 'fq_embed_templates.h', 'fq_mat.h', 'fq_mat_templates.h', 'fq_nmod.h', 'fq_nmod_embed.h', 'fq_nmod_mat.h', 'fq_nmod_mpoly.h', 'fq_nmod_poly.h', 'fq_nmod_poly_factor.h', 'fq_nmod_vec.h', 'fq_poly.h', 'fq_poly_factor.h', 'fq_poly_factor_templates.h', 'fq_poly_templates.h', 'fq_templates.h', 'fq_vec.h', 'fq_vec_templates.h', 'fq_zech.h', 'fq_zech_embed.h', 'fq_zech_mat.h', 'fq_zech_poly.h', 'fq_zech_poly_factor.h', 'fq_zech_vec.h', 'gettimeofday.h', 'gmpcompat.h', 'hashmap.h', 'long_extras.h', 'longlong.h', 'mpf_mat.h', 'mpf_vec.h', 'mpfr_mat.h', 'mpfr_vec.h', 'mpn_extras.h', 'mpoly.h', 'nmod_mat.h', 'nmod_matxx.h', 'nmod_mpoly.h', 'nmod_poly.h', 'nmod_poly_factor.h', 'nmod_poly_mat.h', 'nmod_poly_matxx.h', 'nmod_polyxx.h', 'nmod_vec.h', 'nmod_vecxx.h', 'padic.h', 'padic_mat.h', 'padic_matxx.h', 'padic_poly.h', 'padic_polyxx.h', 'padicxx.h', 'perm.h', 'permxx.h', 'profiler.h', 'qadic.h', 'qadicxx.h', 'qsieve.h', 'templates.h', 'thread_pool.h', 'thread_support.h', 'ulong_extras.h'])
+headers = files({headers})
 
 headers += generated_headers_install
 
-subdirs = ['aprcl', 'ulong_extras', 'long_extras', 'perm', 'fmpz', 'fmpz_vec', 'fmpz_poly', 'fmpq_poly', 'fmpz_mat', 'fmpz_lll', 'mpfr_vec', 'mpfr_mat', 'mpf_vec', 'mpf_mat', 'nmod_vec', 'nmod_poly', 'nmod_poly_factor', 'arith', 'mpn_extras', 'nmod_mat', 'fmpq', 'fmpq_vec', 'fmpq_mat', 'padic', 'fmpz_poly_q', 'fmpz_poly_mat', 'nmod_poly_mat', 'fmpz_mod_poly', 'fmpz_mod_mat', 'fmpz_mod_poly_factor', 'fmpz_factor', 'fmpz_poly_factor', 'fft', 'qsieve', 'double_extras', 'd_vec', 'd_mat', 'padic_poly', 'padic_mat', 'qadic', 'fq', 'fq_vec', 'fq_mat', 'fq_poly', 'fq_poly_factor', 'fq_nmod', 'fq_nmod_vec', 'fq_nmod_mat', 'fq_nmod_poly', 'fq_nmod_poly_factor', 'fq_zech', 'fq_zech_vec', 'fq_zech_mat', 'fq_zech_poly', 'fq_zech_poly_factor', 'thread_pool', 'fmpz_mod', 'mpoly', 'fmpz_mpoly', 'fmpq_mpoly', 'nmod_mpoly', 'fq_nmod_mpoly', 'fmpz_mod_mpoly', 'flintxx', 'fq_vec_templates', 'fq_mat_templates', 'fq_poly_templates', 'fq_poly_factor_templates', 'fq_templates']
+subdirs = {subdirs}
 subdir_static_libs = []
 foreach dirname : subdirs
   subdir(dirname)
@@ -191,3 +269,81 @@ flint_dep = declare_dependency(
 if meson.version().version_compare('>=0.54.0')
   meson.override_dependency('flint', flint_dep)
 endif
+"""
+
+meson_options = """
+option('lto', type : 'boolean', value : true, yield : true,
+       description : 'Enable link-time optimisation.')
+"""
+
+import sys
+import os
+import argparse
+
+parser = argparse.ArgumentParser(
+    description='Meson build system generator for FLINT')
+
+default_flint_dir = '.'
+parser.add_argument(
+    'flint_dir',
+    nargs='?',
+    default=default_flint_dir,
+    help='The FLINT directory to generate the build system for (default: "' +
+        default_flint_dir + '")')
+parser.add_argument(
+    'target_dir',
+    nargs='?',
+    default=None,
+    help='The target directory to write the Meson build files to' +
+        ' (default: same as flint_dir). Will be created if it doesn\'t exist,' +
+        ' but not recursively.')
+
+args = parser.parse_args()
+
+flint_dir = args.flint_dir
+target_dir = args.target_dir
+if target_dir is None:
+    target_dir = args.flint_dir
+
+if not os.path.isdir(flint_dir):
+    print('ERROR: FLINT directory "' + flint_dir + '" doesn\'t exist',
+          file=sys.stderr)
+    sys.exit(1)
+
+for dirname in build_dirs + template_dirs:
+    if not os.path.isdir(os.path.join(flint_dir, dirname)):
+        print('ERROR: FLINT subdirectory "' + dirname + '" doesn\'t exist',
+              file=sys.stderr)
+        sys.exit(1)
+
+if not os.path.isdir(target_dir):
+    os.mkdir(target_dir)
+if not os.path.isdir(os.path.join(target_dir, 'include')):
+    os.mkdir(os.path.join(target_dir, 'include'))
+if not os.path.isdir(os.path.join(target_dir, 'include', 'flint')):
+    os.mkdir(os.path.join(target_dir, 'include', 'flint'))
+
+with open(os.path.join(target_dir, 'meson.build'), 'w') as fh:
+    headers = [f for f in os.listdir(flint_dir) if f.endswith('.h')]
+    fh.write(meson_root_tmpl.format(
+        sources=sources,
+        headers=headers,
+        subdirs=build_dirs + template_dirs))
+
+with open(os.path.join(target_dir, 'include', 'flint', 'meson.build'), 'w') as fh:
+    fh.write(meson_header)
+
+with open(os.path.join(target_dir, 'meson_options.txt'), 'w') as fh:
+    fh.write(meson_options)
+
+for dirname in build_dirs + template_dirs:
+    if not os.path.isdir(os.path.join(target_dir, dirname)):
+        os.mkdir(os.path.join(target_dir, dirname))
+    src = [f for f in os.listdir(os.path.join(flint_dir, dirname))
+           if f.endswith('.c')]
+    headers = [f for f in os.listdir(os.path.join(flint_dir, dirname))
+               if f.endswith('.h')]
+    meson_src = meson_subdir_tmpl.format(
+        dirname=dirname, src=src, headers=headers)
+    with open(os.path.join(target_dir, dirname, 'meson.build'), 'w') as fh:
+        fh.write(meson_src)

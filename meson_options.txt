@@ -1,9 +1,3 @@
 
-option('arch', type: 'string', value: '', yield : true,
-       description: 'Set compiler option -march=<value>.')
-
-option('lto', type: 'boolean', value: false, yield : true,
-       description: 'Enable link-time optimisation.')
-
-option('longcmdhack', type: 'boolean', value: true, yield : true,
-       description: 'Build static libraries in all subdirectories and link the to a shared library to circumvent the "Argument list too long" error.')
+option('lto', type : 'boolean', value : true, yield : true,
+       description : 'Enable link-time optimisation.')
