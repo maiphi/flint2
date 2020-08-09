@@ -85,7 +85,7 @@ project(
   default_options : [
     'c_std=c11',
     'buildtype=release',
-    'default_library=shared',
+    'default_library=both',
     'warning_level=1'])
 
 # warning_level=0 doesn't exist in old Meson versions
@@ -235,12 +235,21 @@ src += generated_headers
 
 if meson.version().version_compare('>=0.55.0')
   # Meson 0.55 uses response files to circumvent command line length limits.
-  flint = library(
-    'flint',
-    src,
-    dependencies : deps,
-    override_options : [override_warning_level],
-    install : true)
+  if get_option('static')
+    flint = static_library(
+      'flint',
+      src,
+      dependencies : deps,
+      override_options : [override_warning_level],
+      install : true)
+  else
+    flint = library(
+      'flint',
+      src,
+      dependencies : deps,
+      override_options : [override_warning_level],
+      install : true)
+  endif
 else
   # Use a workaround to avoid hitting command line length limits.
   # This way it is only possible to build a shared library.
