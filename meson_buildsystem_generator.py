@@ -93,23 +93,29 @@ override_warning_level = 'warning_level=1'
 
 c_compiler = meson.get_compiler('c')
 
-deps = [dependency('zlib'), dependency('threads')]
+deps = [
+  dependency('zlib', static : get_option('static')),
+  dependency('threads', static : get_option('static'))]
 
 # On some systems, gmp doesn't provide a pkg-config file.
-gmp_dep = dependency('gmp', required : false)
+gmp_dep = dependency('gmp', required : false, static : get_option('static'))
 if not gmp_dep.found()
-  gmp_dep = c_compiler.find_library('gmp', required : true)
+  gmp_dep = c_compiler.find_library('gmp', required : true, static : get_option('static'))
 endif
 deps += gmp_dep
 
 # The same with mpfr.
-mpfr_dep = dependency('mpfr', required : false)
+mpfr_dep = dependency('mpfr', required : false, static : get_option('static'))
 if not mpfr_dep.found()
-  mpfr_dep = c_compiler.find_library('mpfr', required : true)
+  mpfr_dep = c_compiler.find_library('mpfr', required : true, static : get_option('static'))
 endif
 deps += mpfr_dep
 
-m_dep = c_compiler.find_library('m', required : false)
+if get_option('static')
+  m_dep = c_compiler.find_library('m', required : false, static : true)
+else
+  m_dep = c_compiler.find_library('m', required : false)
+endif
 if m_dep.found()
   deps += m_dep
 endif
@@ -192,9 +198,6 @@ generated_headers_noinstall = [cpimport_h]
 generated_headers = generated_headers_install + generated_headers_noinstall
 
 compiler_options = ['-Wno-unused-but-set-variable', '-funroll-loops', '-mpopcnt']
-if get_option('lto')
-  compiler_options += '-flto'
-endif
 # -fno-fat-lto-objects for gcc is the default, if supported.
 add_project_arguments('-Dflint_EXPORTS', language : 'c')
 if not get_option('buildtype').startswith('debug')
@@ -205,9 +208,6 @@ foreach opt : compiler_options
     add_project_arguments(opt, language : 'c')
   endif
 endforeach
-if compiler_options.contains('-flto') and c_compiler.has_link_argument('-flto')
-  add_project_link_arguments('-flto', language : 'c')
-endif
 
 include_dir = include_directories('.')
 
@@ -272,8 +272,8 @@ endif
 """
 
 meson_options = """
-option('lto', type : 'boolean', value : true, yield : true,
-       description : 'Enable link-time optimisation.')
+option('static', type : 'boolean', value : false, yield : true,
+       description : 'Use static dependencies.')
 """
 
 import sys

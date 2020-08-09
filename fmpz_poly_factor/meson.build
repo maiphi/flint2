@@ -1,5 +1,5 @@
 
-src_fmpz_poly_factor = files(['CLD_mat.c', 'clear.c', 'concat.c', 'factor_squarefree.c', 'factor_van_hoeij.c', 'fit_length.c', 'init.c', 'inlines.c', 'insert.c', 'print.c', 'realloc.c', 'set.c', 'van_hoeij_check_if_solved.c', 'factor.c', 'factor_quadratic.c', 'factor_zassenhaus.c', 'factor_zassenhaus_recombination.c'])
+src_fmpz_poly_factor = files(['CLD_mat.c', 'clear.c', 'concat.c', 'factor.c', 'factor_quadratic.c', 'factor_squarefree.c', 'factor_van_hoeij.c', 'factor_zassenhaus.c', 'factor_zassenhaus_recombination.c', 'fit_length.c', 'init.c', 'inlines.c', 'insert.c', 'print.c', 'realloc.c', 'set.c', 'van_hoeij_check_if_solved.c'])
 
 headers += files([])
 

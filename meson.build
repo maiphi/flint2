@@ -15,23 +15,29 @@ override_warning_level = 'warning_level=1'
 
 c_compiler = meson.get_compiler('c')
 
-deps = [dependency('zlib'), dependency('threads')]
+deps = [
+  dependency('zlib', static : get_option('static')),
+  dependency('threads', static : get_option('static'))]
 
 # On some systems, gmp doesn't provide a pkg-config file.
-gmp_dep = dependency('gmp', required : false)
+gmp_dep = dependency('gmp', required : false, static : get_option('static'))
 if not gmp_dep.found()
-  gmp_dep = c_compiler.find_library('gmp', required : true)
+  gmp_dep = c_compiler.find_library('gmp', required : true, static : get_option('static'))
 endif
 deps += gmp_dep
 
 # The same with mpfr.
-mpfr_dep = dependency('mpfr', required : false)
+mpfr_dep = dependency('mpfr', required : false, static : get_option('static'))
 if not mpfr_dep.found()
-  mpfr_dep = c_compiler.find_library('mpfr', required : true)
+  mpfr_dep = c_compiler.find_library('mpfr', required : true, static : get_option('static'))
 endif
 deps += mpfr_dep
 
-m_dep = c_compiler.find_library('m', required : false)
+if get_option('static')
+  m_dep = c_compiler.find_library('m', required : false, static : true)
+else
+  m_dep = c_compiler.find_library('m', required : false)
+endif
 if m_dep.found()
   deps += m_dep
 endif
@@ -114,9 +120,6 @@ generated_headers_noinstall = [cpimport_h]
 generated_headers = generated_headers_install + generated_headers_noinstall
 
 compiler_options = ['-Wno-unused-but-set-variable', '-funroll-loops', '-mpopcnt']
-if get_option('lto')
-  compiler_options += '-flto'
-endif
 # -fno-fat-lto-objects for gcc is the default, if supported.
 add_project_arguments('-Dflint_EXPORTS', language : 'c')
 if not get_option('buildtype').startswith('debug')
@@ -127,9 +130,6 @@ foreach opt : compiler_options
     add_project_arguments(opt, language : 'c')
   endif
 endforeach
-if compiler_options.contains('-flto') and c_compiler.has_link_argument('-flto')
-  add_project_link_arguments('-flto', language : 'c')
-endif
 
 include_dir = include_directories('.')
 
@@ -137,7 +137,7 @@ src = files(['printf.c', 'fprintf.c', 'sprintf.c', 'scanf.c', 'fscanf.c', 'sscan
 
 src += fmpz_c
 
-headers = files(['NTL-interface.h', 'd_mat.h', 'd_vec.h', 'double_extras.h', 'exception.h', 'fft.h', 'flintxx.h', 'fmpq_mat.h', 'fmpq_matxx.h', 'fmpq_polyxx.h', 'fmpq_vec.h', 'fmpz_factorxx.h', 'fmpz_lll.h', 'fmpz_matxx.h', 'fmpz_mod.h', 'fmpz_mod_poly_factorxx.h', 'fmpz_mod_polyxx.h', 'fmpz_poly_factorxx.h', 'fmpz_poly_mat.h', 'fmpz_poly_matxx.h', 'fmpz_poly_q.h', 'fmpz_poly_qxx.h', 'fmpz_polyxx.h', 'fmpz_vec.h', 'fmpz_vecxx.h', 'fq_embed.h', 'fq_embed_templates.h', 'fq_mat.h', 'fq_mat_templates.h', 'fq_nmod_embed.h', 'fq_nmod_mat.h', 'fq_nmod_poly.h', 'fq_nmod_vec.h', 'fq_poly.h', 'fq_templates.h', 'fq_vec.h', 'fq_vec_templates.h', 'fq_zech_embed.h', 'fq_zech_mat.h', 'fq_zech_poly.h', 'fq_zech_poly_factor.h', 'fq_zech_vec.h', 'hashmap.h', 'longlong.h', 'mpf_mat.h', 'mpf_vec.h', 'mpfr_mat.h', 'mpfr_vec.h', 'mpn_extras.h', 'nmod_matxx.h', 'nmod_poly_mat.h', 'nmod_poly_matxx.h', 'nmod_polyxx.h', 'nmod_vec.h', 'nmod_vecxx.h', 'padic_mat.h', 'padic_matxx.h', 'padic_poly.h', 'padic_polyxx.h', 'padicxx.h', 'perm.h', 'permxx.h', 'profiler.h', 'qadicxx.h', 'templates.h', 'aprcl.h', 'arith.h', 'arithxx.h', 'flint.h', 'fmpq.h', 'fmpq_mpoly.h', 'fmpq_poly.h', 'fmpqxx.h', 'fmpz.h', 'fmpz_factor.h', 'fmpz_mat.h', 'fmpz_mod_mat.h', 'fmpz_mod_mpoly.h', 'fmpz_mod_poly.h', 'fmpz_mod_poly_factor.h', 'fmpz_mpoly.h', 'fmpz_poly.h', 'fmpz_poly_factor.h', 'fmpzxx.h', 'fq.h', 'fq_nmod.h', 'fq_nmod_mpoly.h', 'fq_nmod_poly_factor.h', 'fq_poly_factor.h', 'fq_poly_factor_templates.h', 'fq_poly_templates.h', 'fq_zech.h', 'gettimeofday.h', 'gmpcompat.h', 'long_extras.h', 'mpoly.h', 'nmod_mat.h', 'nmod_mpoly.h', 'nmod_poly.h', 'nmod_poly_factor.h', 'padic.h', 'qadic.h', 'qsieve.h', 'thread_pool.h', 'thread_support.h', 'ulong_extras.h'])
+headers = files(['NTL-interface.h', 'aprcl.h', 'arith.h', 'arithxx.h', 'd_mat.h', 'd_vec.h', 'double_extras.h', 'exception.h', 'fft.h', 'flint.h', 'flintxx.h', 'fmpq.h', 'fmpq_mat.h', 'fmpq_matxx.h', 'fmpq_mpoly.h', 'fmpq_poly.h', 'fmpq_polyxx.h', 'fmpq_vec.h', 'fmpqxx.h', 'fmpz.h', 'fmpz_factor.h', 'fmpz_factorxx.h', 'fmpz_lll.h', 'fmpz_mat.h', 'fmpz_matxx.h', 'fmpz_mod.h', 'fmpz_mod_mat.h', 'fmpz_mod_mpoly.h', 'fmpz_mod_poly.h', 'fmpz_mod_poly_factor.h', 'fmpz_mod_poly_factorxx.h', 'fmpz_mod_polyxx.h', 'fmpz_mpoly.h', 'fmpz_poly.h', 'fmpz_poly_factor.h', 'fmpz_poly_factorxx.h', 'fmpz_poly_mat.h', 'fmpz_poly_matxx.h', 'fmpz_poly_q.h', 'fmpz_poly_qxx.h', 'fmpz_polyxx.h', 'fmpz_vec.h', 'fmpz_vecxx.h', 'fmpzxx.h', 'fq.h', 'fq_embed.h', 'fq_embed_templates.h', 'fq_mat.h', 'fq_mat_templates.h', 'fq_nmod.h', 'fq_nmod_embed.h', 'fq_nmod_mat.h', 'fq_nmod_mpoly.h', 'fq_nmod_poly.h', 'fq_nmod_poly_factor.h', 'fq_nmod_vec.h', 'fq_poly.h', 'fq_poly_factor.h', 'fq_poly_factor_templates.h', 'fq_poly_templates.h', 'fq_templates.h', 'fq_vec.h', 'fq_vec_templates.h', 'fq_zech.h', 'fq_zech_embed.h', 'fq_zech_mat.h', 'fq_zech_poly.h', 'fq_zech_poly_factor.h', 'fq_zech_vec.h', 'gettimeofday.h', 'gmpcompat.h', 'hashmap.h', 'long_extras.h', 'longlong.h', 'mpf_mat.h', 'mpf_vec.h', 'mpfr_mat.h', 'mpfr_vec.h', 'mpn_extras.h', 'mpoly.h', 'nmod_mat.h', 'nmod_matxx.h', 'nmod_mpoly.h', 'nmod_poly.h', 'nmod_poly_factor.h', 'nmod_poly_mat.h', 'nmod_poly_matxx.h', 'nmod_polyxx.h', 'nmod_vec.h', 'nmod_vecxx.h', 'padic.h', 'padic_mat.h', 'padic_matxx.h', 'padic_poly.h', 'padic_polyxx.h', 'padicxx.h', 'perm.h', 'permxx.h', 'profiler.h', 'qadic.h', 'qadicxx.h', 'qsieve.h', 'templates.h', 'thread_pool.h', 'thread_support.h', 'ulong_extras.h'])
 
 headers += generated_headers_install
 

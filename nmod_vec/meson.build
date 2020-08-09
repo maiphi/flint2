@@ -1,5 +1,5 @@
 
-src_nmod_vec = files(['add.c', 'discrete_log_pohlig_hellman.c', 'dot.c', 'dot_bound_limbs.c', 'dot_ptr.c', 'inlines.c', 'max_bits.c', 'neg.c', 'randtest.c', 'reduce.c', 'scalar_addmul_nmod.c', 'scalar_mul_nmod_shoup.c', 'sub.c', 'scalar_mul_nmod.c'])
+src_nmod_vec = files(['add.c', 'discrete_log_pohlig_hellman.c', 'dot.c', 'dot_bound_limbs.c', 'dot_ptr.c', 'inlines.c', 'max_bits.c', 'neg.c', 'randtest.c', 'reduce.c', 'scalar_addmul_nmod.c', 'scalar_mul_nmod.c', 'scalar_mul_nmod_shoup.c', 'sub.c'])
 
 headers += files([])
 

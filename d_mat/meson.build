@@ -1,5 +1,5 @@
 
-src_d_mat = files(['approx_equal.c', 'clear.c', 'equal.c', 'init.c', 'inlines.c', 'is_approx_zero.c', 'is_zero.c', 'mul_classical.c', 'one.c', 'print.c', 'randtest.c', 'set.c', 'swap.c', 'transpose.c', 'zero.c', 'gso.c', 'qr.c'])
+src_d_mat = files(['approx_equal.c', 'clear.c', 'equal.c', 'gso.c', 'init.c', 'inlines.c', 'is_approx_zero.c', 'is_zero.c', 'mul_classical.c', 'one.c', 'print.c', 'qr.c', 'randtest.c', 'set.c', 'swap.c', 'transpose.c', 'zero.c'])
 
 headers += files([])
 
