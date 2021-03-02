@@ -7,7 +7,7 @@
     FLINT is free software: you can redistribute it and/or modify it under
     the terms of the GNU Lesser General Public License (LGPL) as published
     by the Free Software Foundation; either version 2.1 of the License, or
-    (at your option) any later version.  See <http://www.gnu.org/licenses/>.
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
 #include <stdlib.h>
@@ -97,26 +97,33 @@ void _fmpz_poly_factor_zassenhaus(fmpz_poly_factor_t final_fac,
     flint_printf("|f = "), fmpz_poly_print(f), flint_printf("\n");
     #endif
 
-    if (lenF == 2)
+    if (lenF < 5)
     {
-        fmpz_poly_factor_insert(final_fac, f, exp);
-    }
-    else if (lenF == 3)
-    {
-        _fmpz_poly_factor_quadratic(final_fac, f, exp);
+        if (lenF < 3)
+            fmpz_poly_factor_insert(final_fac, f, exp);
+        else if (lenF == 3)
+            _fmpz_poly_factor_quadratic(final_fac, f, exp);
+        else
+            _fmpz_poly_factor_cubic(final_fac, f, exp);
+
+        return;
     }
     else
     {
-        slong i;
+        slong i, j;
         slong r = lenF;
         mp_limb_t p = 2;
         nmod_poly_t d, g, t;
         nmod_poly_factor_t fac;
+        zassenhaus_prune_t Z;
 
+        zassenhaus_prune_init(Z);
         nmod_poly_factor_init(fac);
         nmod_poly_init_preinv(t, 1, 0);
         nmod_poly_init_preinv(d, 1, 0);
         nmod_poly_init_preinv(g, 1, 0);
+
+        zassenhaus_prune_set_degree(Z, lenF - 1);
 
         for (i = 0; i < 3; i++)
         {
@@ -142,6 +149,12 @@ void _fmpz_poly_factor_zassenhaus(fmpz_poly_factor_t final_fac,
                         nmod_poly_factor_init(temp_fac);
                         nmod_poly_factor(temp_fac, t);
 
+                        zassenhaus_prune_start_add_factors(Z);
+                        for (j = 0; j < temp_fac->num; j++)
+                            zassenhaus_prune_add_factor(Z,
+                                  temp_fac->p[j].length - 1, temp_fac->exp[j]);
+                        zassenhaus_prune_end_add_factors(Z);
+
                         if (temp_fac->num <= r)
                         {
                             r = temp_fac->num;
@@ -164,32 +177,23 @@ void _fmpz_poly_factor_zassenhaus(fmpz_poly_factor_t final_fac,
         {
             fmpz_poly_factor_insert(final_fac, f, exp);
         }
-        else if (r > cutoff)
+        else if (r > cutoff && use_van_hoeij)
         {
-            if (use_van_hoeij)
-               fmpz_poly_factor_van_hoeij(final_fac, fac, f, exp, p);
-            else
-            {
-               flint_printf("Exception (fmpz_poly_factor_zassenhaus). r > cutoff.\n");
-               nmod_poly_factor_clear(fac);
-               flint_abort();
-            }
+           fmpz_poly_factor_van_hoeij(final_fac, fac, f, exp, p);
         }
         else
         {
             slong a;
+            fmpz_t T;
             fmpz_poly_factor_t lifted_fac;
-            fmpz_poly_factor_init(lifted_fac);
 
-            {
-                fmpz_t B;
-                fmpz_init(B);
-                fmpz_poly_factor_mignotte(B, f);
-                fmpz_mul_ui(B, B, 2);
-                fmpz_add_ui(B, B, 1);
-                a = fmpz_clog_ui(B, p);
-                fmpz_clear(B);
-            }
+            fmpz_poly_factor_init(lifted_fac);
+            fmpz_init(T);
+
+            fmpz_poly_factor_mignotte(T, f);
+            fmpz_mul_ui(T, T, 2);
+            fmpz_add_ui(T, T, 1);
+            a = fmpz_clog_ui(T, p);
 
             fmpz_poly_hensel_lift_once(lifted_fac, f, fac, a);
 
@@ -201,21 +205,17 @@ void _fmpz_poly_factor_zassenhaus(fmpz_poly_factor_t final_fac,
             fmpz_poly_factor_print(lifted_fac);
             #endif
 
-            /* Recombination */
-            {
-                fmpz_t P;
-                fmpz_init(P);
-                fmpz_set_ui(P, p);
-                fmpz_pow_ui(P, P, a);
-
-                fmpz_poly_factor_zassenhaus_recombination(final_fac, lifted_fac, f, P, exp);
-
-                fmpz_clear(P);
-            }
+            fmpz_set_ui(T, p);
+            fmpz_pow_ui(T, T, a);
+            fmpz_poly_factor_zassenhaus_recombination_with_prune(
+                                          final_fac, lifted_fac, f, T, exp, Z);
 
             fmpz_poly_factor_clear(lifted_fac);
+            fmpz_clear(T);
         }
+
         nmod_poly_factor_clear(fac);
+        zassenhaus_prune_clear(Z);
     }
 }
 
@@ -274,7 +274,10 @@ void fmpz_poly_factor_zassenhaus(fmpz_poly_factor_t fac, const fmpz_poly_t G)
 
         /* Factor each square-free part */
         for (j = 0; j < sq_fr_fac->num; j++)
-            _fmpz_poly_factor_zassenhaus(fac, sq_fr_fac->exp[j], sq_fr_fac->p + j, 10, 0);
+        {
+            _fmpz_poly_factor_zassenhaus(fac, sq_fr_fac->exp[j],
+                                                sq_fr_fac->p + j, WORD_MAX, 0);
+        }
 
         fmpz_poly_factor_clear(sq_fr_fac);
     }

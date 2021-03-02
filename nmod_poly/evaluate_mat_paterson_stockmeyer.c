@@ -6,7 +6,7 @@
     FLINT is free software: you can redistribute it and/or modify it under
     the terms of the GNU Lesser General Public License (LGPL) as published
     by the Free Software Foundation; either version 2.1 of the License, or
-    (at your option) any later version.  See <http://www.gnu.org/licenses/>.
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
 #include <gmp.h>
@@ -56,19 +56,19 @@ nmod_poly_evaluate_mat_paterson_stockmeyer(nmod_mat_t dest, const nmod_poly_t po
 
     for (i = 0; i < rem; i++)
     {
-        nmod_mat_scalar_mul_add(dest, dest,
-                                poly->coeffs[poly->length - rem + i], temp[i]);
+        nmod_mat_scalar_addmul_ui(dest, dest,
+                                temp[i], poly->coeffs[poly->length - rem + i]);
     }
 
     for (i = 0; i < quo; i++)
     {
         nmod_mat_mul(tmat, dest, temp[lim]);
-        nmod_mat_scalar_mul_add(dest, tmat, poly->coeffs[curr--],
-                                temp[lim - 1]);
+        nmod_mat_scalar_addmul_ui(dest, tmat, temp[lim - 1], poly->coeffs[curr--]);
+
         for (j = 1; j < lim; j++)
         {
-            nmod_mat_scalar_mul_add(dest, dest, poly->coeffs[curr--],
-                                    temp[lim - 1 - j]);
+            nmod_mat_scalar_addmul_ui(dest, dest, temp[lim - 1 - j],
+                                                          poly->coeffs[curr--]);
         }
     }
 

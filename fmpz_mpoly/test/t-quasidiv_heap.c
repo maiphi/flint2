@@ -6,7 +6,7 @@
     FLINT is free software: you can redistribute it and/or modify it under
     the terms of the GNU Lesser General Public License (LGPL) as published
     by the Free Software Foundation; either version 2.1 of the License, or
-    (at your option) any later version.  See <http://www.gnu.org/licenses/>.
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
@@ -111,7 +111,7 @@ main(void)
 
         coeff_bits = n_randint(state, 70);
 
-        max_bound = 1 + 500/ctx->minfo->nvars/ctx->minfo->nvars;
+        max_bound = 1 + 200/ctx->minfo->nvars/ctx->minfo->nvars;
         exp_bound = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
@@ -204,7 +204,7 @@ main(void)
 
         coeff_bits = n_randint(state, 70);
 
-        max_bound = 1 + 500/ctx->minfo->nvars/ctx->minfo->nvars;
+        max_bound = 1 + 200/ctx->minfo->nvars/ctx->minfo->nvars;
         exp_bound = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
@@ -296,7 +296,7 @@ main(void)
 
         coeff_bits = n_randint(state, 70);
 
-        max_bound = 1 + 500/ctx->minfo->nvars/ctx->minfo->nvars;
+        max_bound = 1 + 200/ctx->minfo->nvars/ctx->minfo->nvars;
         exp_bound = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));

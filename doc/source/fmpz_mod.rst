@@ -49,9 +49,27 @@ Comparison of elements against each other or against zero can be accomplished wi
 
     Set `a` to `b+c` modulo `n`.
 
+.. function:: void fmpz_mod_add_fmpz(fmpz_t a, const fmpz_t b, const fmpz_t c, const fmpz_mod_ctx_t ctx);
+              void fmpz_mod_add_ui(fmpz_t a, const fmpz_t b, ulong c, const fmpz_mod_ctx_t ctx);
+              void fmpz_mod_add_si(fmpz_t a, const fmpz_t b, slong c, const fmpz_mod_ctx_t ctx);
+
+    Set `a` to `b+c` modulo `n` where only `b` is assumed to be canonical.
+
 .. function:: void fmpz_mod_sub(fmpz_t a, const fmpz_t b, const fmpz_t c, const fmpz_mod_ctx_t ctx)
 
     Set `a` to `b-c` modulo `n`.
+
+.. function:: void fmpz_mod_sub_fmpz(fmpz_t a, const fmpz_t b, const fmpz_t c, const fmpz_mod_ctx_t ctx);
+              void fmpz_mod_sub_ui(fmpz_t a, const fmpz_t b, ulong c, const fmpz_mod_ctx_t ctx);
+              void fmpz_mod_sub_si(fmpz_t a, const fmpz_t b, slong c, const fmpz_mod_ctx_t ctx);
+
+    Set `a` to `b-c` modulo `n` where only `b` is assumed to be canonical.
+
+.. function:: void fmpz_mod_fmpz_sub(fmpz_t a, const fmpz_t b, const fmpz_t c, const fmpz_mod_ctx_t ctx);
+              void fmpz_mod_ui_sub(fmpz_t a, ulong b, const fmpz_t c, const fmpz_mod_ctx_t ctx);
+              void fmpz_mod_si_sub(fmpz_t a, slong b, const fmpz_t c, const fmpz_mod_ctx_t ctx);
+
+    Set `a` to `b-c` modulo `n` where only `c` is assumed to be canonical.
 
 .. function:: void fmpz_mod_neg(fmpz_t a, const fmpz_t b, const fmpz_mod_ctx_t ctx)
 
@@ -86,7 +104,7 @@ Discrete Logarithms via Pohlig-Hellman
 
 .. function:: void fmpz_mod_discrete_log_pohlig_hellman_init(fmpz_mod_discrete_log_pohlig_hellman_t L)
 
-    Initialize ``L``. Upon initilization ``L`` is not ready for computation.
+    Initialize ``L``. Upon initialization ``L`` is not ready for computation.
 
 .. function:: void fmpz_mod_discrete_log_pohlig_hellman_clear(fmpz_mod_discrete_log_pohlig_hellman_t L)
 
@@ -103,7 +121,7 @@ Discrete Logarithms via Pohlig-Hellman
 
 .. function:: void fmpz_mod_discrete_log_pohlig_hellman_run(fmpz_t x, const fmpz_mod_discrete_log_pohlig_hellman_t L, const fmpz_t y)
 
-    Set ``x`` to the logarithm of ``y`` with repect to the internally stored base. ``y`` is expected to be reduced modulo the ``p``.
+    Set ``x`` to the logarithm of ``y`` with respect to the internally stored base. ``y`` is expected to be reduced modulo the ``p``.
     The function is undefined if the logarithm does not exist.
 
 

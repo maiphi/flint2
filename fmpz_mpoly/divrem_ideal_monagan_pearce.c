@@ -6,7 +6,7 @@
     FLINT is free software: you can redistribute it and/or modify it under
     the terms of the GNU Lesser General Public License (LGPL) as published
     by the Free Software Foundation; either version 2.1 of the License, or
-    (at your option) any later version.  See <http://www.gnu.org/licenses/>.
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
 #include <gmp.h>
@@ -52,14 +52,13 @@ slong _fmpz_mpoly_divrem_ideal_monagan_pearce1(fmpz_mpoly_struct ** polyq,
 
     TMP_START;
 
-
     fmpz_init(q);
     fmpz_init(qc);
 
     bits2 = _fmpz_vec_max_bits(poly2, len2);
 
     chains = (mpoly_nheap_t **) TMP_ALLOC(len*sizeof(mpoly_nheap_t *));
-    hinds = (slong **) TMP_ALLOC(len*sizeof(mpoly_heap_t *));
+    hinds = (slong **) TMP_ALLOC(len*sizeof(slong *));
 
     bits3 = 0;
     len3 = 0;
@@ -79,16 +78,14 @@ slong _fmpz_mpoly_divrem_ideal_monagan_pearce1(fmpz_mpoly_struct ** polyq,
 
     next_loc = len3 + 4;   /* something bigger than heap can ever be */
     heap = (mpoly_heap1_s *) TMP_ALLOC((len3 + 1)*sizeof(mpoly_heap1_s));
-    store = store_base = (slong *) TMP_ALLOC(3*len3*sizeof(mpoly_nheap_t *));
+    store = store_base = (slong *) TMP_ALLOC(3*len3*sizeof(slong));
 
     k = (slong *) TMP_ALLOC(len*sizeof(slong));
     s = (slong *) TMP_ALLOC(len*sizeof(slong));
     ub = (ulong *) TMP_ALLOC(len*sizeof(ulong));
     mb = (fmpz * ) TMP_ALLOC(len*sizeof(fmpz));
 
-    mask = 0;
-    for (i = 0; i < FLINT_BITS/bits; i++)
-        mask = (mask << bits) + (UWORD(1) << (bits - 1));
+    mask = mpoly_overflow_mask_sp(bits);
 
     for (w = 0; w < len; w++)
     {
@@ -373,7 +370,7 @@ slong _fmpz_mpoly_divrem_ideal_monagan_pearce(fmpz_mpoly_struct ** polyq,
     bits2 = _fmpz_vec_max_bits(poly2, len2);
    
     chains = (mpoly_nheap_t **) TMP_ALLOC(len*sizeof(mpoly_nheap_t *));
-    hinds = (slong **) TMP_ALLOC(len*sizeof(mpoly_heap_t *));
+    hinds = (slong **) TMP_ALLOC(len*sizeof(slong *));
     bits3 = 0;
     len3 = 0;
     for (w = 0; w < len; w++)
@@ -393,7 +390,7 @@ slong _fmpz_mpoly_divrem_ideal_monagan_pearce(fmpz_mpoly_struct ** polyq,
 
     next_loc = len3 + 4;   /* something bigger than heap can ever be */
     heap = (mpoly_heap_s *) TMP_ALLOC((len3 + 1)*sizeof(mpoly_heap_s));
-    store = store_base = (slong *) TMP_ALLOC(3*len3*sizeof(mpoly_nheap_t *));
+    store = store_base = (slong *) TMP_ALLOC(3*len3*sizeof(slong));
 
     exps = (ulong *) TMP_ALLOC(len3*N*sizeof(ulong));
     exp_list = (ulong **) TMP_ALLOC(len3*sizeof(ulong *));
@@ -408,9 +405,7 @@ slong _fmpz_mpoly_divrem_ideal_monagan_pearce(fmpz_mpoly_struct ** polyq,
     for (i = 0; i < len3; i++)
         exp_list[i] = exps + i*N;
 
-    mask = 0;
-    for (i = 0; i < FLINT_BITS/bits; i++)
-        mask = (mask << bits) + (UWORD(1) << (bits - 1));
+    mask = bits <= FLINT_BITS ? mpoly_overflow_mask_sp(bits) : 0;
 
     for (w = 0; w < len; w++)
     {

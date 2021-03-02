@@ -5,6 +5,7 @@ include(CheckIncludeFiles)
 include(CheckFunctionExists)
 include(CheckPrototypeDefinition)
 include(CheckCCompilerFlag)
+include(CheckCSourceRuns)
 include(CheckLibraryExists)
 include(TestBigEndian)
 
@@ -35,13 +36,24 @@ if (WITH_NTL)
 endif()
 find_package(PythonInterp REQUIRED)
 
+find_package(CBLAS)
+set(FLINT_USES_BLAS ${CBLAS_FOUND})
+
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+  set(FLINT_WANT_ASSERT ON)
+endif()
+
+# pthread configuration
+
 if(MSVC)
     find_package(PThreads REQUIRED)
+    set(FLINT_USES_PTHREAD ON CACHE BOOL "Use POSIX Threads.")
 else()
     option(CMAKE_THREAD_PREFER_PTHREAD "Prefer pthreads" yes)
     option(THREADS_PREFER_PTHREAD_FLAG "Prefer -pthread flag" yes)
     find_package(Threads REQUIRED)
     set(PThreads_LIBRARIES Threads::Threads)
+    set(FLINT_USES_PTHREAD ON CACHE BOOL "Use POSIX Threads.")
 endif()
 
 # Find sources
@@ -56,8 +68,10 @@ set(BUILD_DIRS
     fq fq_vec fq_mat fq_poly fq_poly_factor
     fq_nmod fq_nmod_vec fq_nmod_mat fq_nmod_poly fq_nmod_poly_factor 
     fq_zech fq_zech_vec fq_zech_mat fq_zech_poly fq_zech_poly_factor 
-    thread_pool fmpz_mod 
+    thread_pool fmpz_mod fmpz_mod_vec n_poly
     mpoly fmpz_mpoly fmpq_mpoly nmod_mpoly fq_nmod_mpoly fmpz_mod_mpoly 
+    fmpz_mpoly_factor fmpq_mpoly_factor nmod_mpoly_factor fmpz_mod_mpoly_factor 
+    fq_nmod_mpoly_factor fq_zech_mpoly fq_zech_mpoly_factor 
     flintxx
 )
 
@@ -111,67 +125,49 @@ with open(join('${CMAKE_SOURCE_DIR}','qadic', 'CPimport.txt')) as fin:
 )
 configure_file(${CMAKE_BINARY_DIR}/CPimport.h.in ${CMAKE_BINARY_DIR}/CPimport.h COPYONLY)
 
-# Configuration checks
-test_big_endian(HAVE_BIG_ENDIAN)
-
-if(NOT HAVE_BIG_ENDIAN)
-    set(HAVE_LITTLE_ENDIAN ON)
-    set(HAVE_DOUBLE_IEEE_LITTLE_ENDIAN ON)
-else()
-    set(HAVE_DOUBLE_IEEE_BIG_ENDIAN ON)
-endif()
-
-# setup for flint-config.h
-check_include_files(alloca.h HAVE_ALLOCA_H)
-check_include_files(dlfcn.h HAVE_DLFCN_H)
-check_include_files(fcntl.h HAVE_FCNTL_H)
-check_include_files(inttypes.h HAVE_INTTYPES_H)
-check_include_files(locale.h HAVE_LOCALE_H)
-check_include_files(memory.h HAVE_MEMORY_H)
-check_include_files(sstream HAVE_SSTREAM)
-check_include_files(stdint.h HAVE_STDINT_H)
-check_include_files(stdlib.h HAVE_STDLIB_H)
-check_include_files(strings.h HAVE_STRINGS_H)
-check_include_files(string.h HAVE_STRING_H)
-check_include_files(sys/mman.h HAVE_SYS_MMAN_H)
-check_include_files(sys/param.h HAVE_SYS_PARAM_H)
-check_include_files(sys/processor.h HAVE_SYS_PROCESSOR_H)
-check_include_files(sys/resource.h HAVE_SYS_RESOURCE_H)
-check_include_files(sys/stat.h HAVE_SYS_STAT_H)
-check_include_files(sys/sysctl.h HAVE_SYS_SYSCTL_H)
-check_include_files(sys/syssgi.h HAVE_SYS_SYSSGI_H)
-check_include_files(sys/systemcfg.h HAVE_SYS_SYSTEMCFG_H)
-check_include_files(sys/times.h HAVE_SYS_TIMES_H)
-check_include_files(sys/time.h HAVE_SYS_TIME_H)
-check_include_files(sys/types.h HAVE_SYS_TYPES_H)
-check_include_files(unistd.h HAVE_UNISTD_H)
-check_include_files(dlfcn.h HAVE_DLFCN_H)
-check_include_files(fpu_control.h HAVE_FPU_CONTROL_H)
-
-
-check_function_exists(alloca HAVE_ALLOCA)
-check_function_exists(alarm HAVE_ALARM)
-check_function_exists(clock HAVE_CLOCK)
-check_function_exists(clock_gettime HAVE_CLOCK_GETTIME)
-check_function_exists(cputime HAVE_CPUTIME)
-check_function_exists(fgetc HAVE_DECL_FGETC)
-check_function_exists(fscanf HAVE_DECL_FSCANF)
-check_function_exists(optarg HAVE_DECL_OPTARG)
-check_function_exists(ungetc HAVE_DECL_UNGETC)
-check_function_exists(vfprintf HAVE_DECL_VFPRINTF)
-check_function_exists(getpagesize HAVE_GETPAGESIZE)
-check_function_exists(getrusage HAVE_GETRUSAGE)
-check_function_exists(gettimeofday HAVE_GETTIMEOFDAY)
-
+# Setup for flint-config.h
 check_c_compiler_flag("-mpopcnt" HAS_FLAG_MPOPCNT)
 check_c_compiler_flag("-funroll-loops" HAS_FLAG_UNROLL_LOOPS)
 
-check_library_exists(${PThreads_LIBRARIES} pthread_getaffinity_np "" HAVE_CPU_SET_T)
+if(HAS_FLAG_MPOPCNT)
+  set(CMAKE_REQUIRED_FLAGS "-mpopcnt")
+endif()
+# Testing __builtin_popcountl...
+check_c_source_runs([[int main(int argc, char ** argv) {
+  #if defined(_WIN64)
+  return __builtin_popcountll(argc) == 100;
+  #else
+  return __builtin_popcountl(argc) == 100;
+  #endif
+  }]] FLINT_USES_POPCNT)
+unset(CMAKE_REQUIRED_FLAGS)
 
-set(HAVE_TLS ON CACHE BOOL "Use thread local storage.")
+# fenv configuration
+check_c_source_compiles([[#include <fenv.h>
+  #ifndef FE_DOWNWARD
+  # error FE_DOWNWARD not available
+  #endif
+  void main(){};]] FLINT_USES_FENV)
 
+# cpu_set_t configuration
+set(CMAKE_REQUIRED_FLAGS "${PThreads_LIBRARIES}")
+check_c_source_compiles([[#define _GNU_SOURCE
+  #include <sched.h>
+  #include <pthread.h>
+  int main() { cpu_set_t s; CPU_ZERO(&s);
+  pthread_getaffinity_np(pthread_self(), sizeof(cpu_set_t), 0);
+  return 0; }]] FLINT_USES_CPUSET)
+unset(CMAKE_REQUIRED_FLAGS)
+
+# Thread-local storage configuration
+if(cxx_thread_local IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+  set(FLINT_USES_TLS ON CACHE BOOL "Use thread local storage.")
+endif()
+
+# Memory manager configuration
 set(MEMORY_MANAGER "reentrant" CACHE STRING "The FLINT memory manager.")
 set_property(CACHE MEMORY_MANAGER PROPERTY STRINGS single reentrant gc)
+message(STATUS "Using FLINT memory manager: ${MEMORY_MANAGER}")
 
 if(MEMORY_MANAGER STREQUAL "reentrant")
 	set(FLINT_REENTRANT ON)
@@ -179,6 +175,7 @@ else()
 	set(FLINT_REENTRANT OFF)
 endif()
 
+# Populate headers
 configure_file(
     config.h.in
     flint-config.h
@@ -229,6 +226,10 @@ target_link_libraries(flint PUBLIC
     ${NTL_LIBRARY} ${MPFR_LIBRARIES} ${GMP_LIBRARIES} ${PThreads_LIBRARIES}
 )
 
+if(FLINT_USES_BLAS)
+    target_link_libraries(flint PUBLIC ${CBLAS_LIBRARIES})
+endif()
+
 # Include directories
 
 target_include_directories(flint PUBLIC 
@@ -237,6 +238,9 @@ target_include_directories(flint PUBLIC
     ${NTL_INCLUDE_DIR}
 )
 
+if(FLINT_USES_BLAS)
+    target_include_directories(flint PUBLIC ${CBLAS_INCLUDE_DIRS})
+endif()
 
 if(BUILD_SHARED_LIBS AND WIN32)
     # Export flint's functions
@@ -293,10 +297,12 @@ if(NOT MSVC)
 	target_link_libraries(flint PUBLIC m)
 endif()
 
+include(GNUInstallDirs)
+
 install(TARGETS flint
-            RUNTIME DESTINATION bin
-            ARCHIVE DESTINATION lib
-            LIBRARY DESTINATION lib
+            RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_BINDIR}"
+            ARCHIVE DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
+            LIBRARY DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
         )
 
 install(FILES ${HEADERS} DESTINATION include/flint)

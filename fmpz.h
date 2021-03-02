@@ -6,7 +6,7 @@
     FLINT is free software: you can redistribute it and/or modify it under
     the terms of the GNU Lesser General Public License (LGPL) as published
     by the Free Software Foundation; either version 2.1 of the License, or
-    (at your option) any later version.  See <http://www.gnu.org/licenses/>.
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
 #ifndef FMPZ_H
@@ -31,7 +31,7 @@
 #include "nmod_vec.h"
 #include "fmpz-conversions.h"
 
-#if HAVE_PTHREAD
+#if FLINT_USES_PTHREAD
 #include <pthread.h>
 #endif
 
@@ -59,7 +59,7 @@ typedef fmpz_preinvn_struct fmpz_preinvn_t[1];
 typedef struct
 {
    int count;
-#if HAVE_PTHREAD
+#if FLINT_USES_PTHREAD
    pthread_t thread;
 #endif
    void * address;
@@ -298,6 +298,8 @@ FLINT_DLL void fmpz_set_ui_array(fmpz_t out, const ulong * in, slong in_len);
 
 FLINT_DLL void fmpz_get_ui_array(ulong * out, slong out_len, const fmpz_t in);
 
+FLINT_DLL void fmpz_set_signed_ui_array(fmpz_t out, const ulong * in, slong in_len);
+
 FLINT_DLL void fmpz_get_mpz(mpz_t x, const fmpz_t f);
 
 FLINT_DLL void fmpz_set_mpz(fmpz_t f, const mpz_t x);
@@ -492,6 +494,52 @@ FMPZ_INLINE void fmpz_sub_si(fmpz_t f, const fmpz_t g, slong x)
         fmpz_add_ui(f, g, (ulong) -x);
 }
 
+FMPZ_INLINE
+void flint_mpz_add_uiui(mpz_ptr a, mpz_srcptr b, ulong c1, ulong c0)
+{
+    ulong d[2];
+    mpz_t c;
+    d[0] = c0;
+    d[1] = c1;
+    c->_mp_d = d;
+    c->_mp_alloc = 2;
+    c->_mp_size = d[1] != 0 ? 2 : d[0] != 0;
+    mpz_add(a, b, c);
+}
+
+FMPZ_INLINE
+void flint_mpz_add_signed_uiui(mpz_ptr a, mpz_srcptr b, ulong c1, ulong c0)
+{
+    ulong d[2];
+    ulong c2 = FLINT_SIGN_EXT(c1);
+    mpz_t c;
+    sub_ddmmss(d[1], d[0], c2^c1, c2^c0, c2, c2);
+    c->_mp_d = d;
+    c->_mp_alloc = 2;
+    c->_mp_size = d[1] != 0 ? 2 : d[0] != 0;
+    if (c2 != 0)
+        c->_mp_size = -c->_mp_size;
+    mpz_add(a, b, c);
+}
+
+FMPZ_INLINE
+void flint_mpz_add_uiuiui(mpz_ptr a, mpz_srcptr b, ulong c2, ulong c1, ulong c0)
+{
+    ulong d[3];
+    mpz_t c;
+    d[0] = c0;
+    d[1] = c1;
+    d[2] = c2;
+    c->_mp_d = d;
+    c->_mp_alloc = 3;
+    c->_mp_size = d[2] != 0 ? 3 : d[1] != 0 ? 2 : d[0] != 0;
+    mpz_add(a, b, c);
+}
+
+FLINT_DLL void fmpz_addmul_si(fmpz_t f, const fmpz_t g, slong x);
+
+FLINT_DLL void fmpz_submul_si(fmpz_t f, const fmpz_t g, slong x);
+
 FLINT_DLL void fmpz_addmul_ui(fmpz_t f, const fmpz_t g, ulong x);
 
 FLINT_DLL void fmpz_submul_ui(fmpz_t f, const fmpz_t g, ulong x);
@@ -500,9 +548,11 @@ FLINT_DLL void fmpz_addmul(fmpz_t f, const fmpz_t g, const fmpz_t h);
 
 FLINT_DLL void fmpz_submul(fmpz_t f, const fmpz_t g, const fmpz_t h);
 
-FLINT_DLL void fmpz_fmma(fmpz_t f, const fmpz_t a, const fmpz_t b, const fmpz_t c, const fmpz_t d);
+FLINT_DLL void fmpz_fmma(fmpz_t f, const fmpz_t a, const fmpz_t b,
+                                   const fmpz_t c, const fmpz_t d);
 
-FLINT_DLL void fmpz_fmms(fmpz_t f, const fmpz_t a, const fmpz_t b, const fmpz_t c, const fmpz_t d);
+FLINT_DLL void fmpz_fmms(fmpz_t f, const fmpz_t a, const fmpz_t b,
+                                   const fmpz_t c, const fmpz_t d);
 
 FLINT_DLL void fmpz_pow_ui(fmpz_t f, const fmpz_t g, ulong exp);
 
@@ -579,6 +629,8 @@ FLINT_DLL void fmpz_xgcd_partial(fmpz_t co2, fmpz_t co1,
 FLINT_DLL int fmpz_invmod(fmpz_t f, const fmpz_t g, const fmpz_t h);
 
 FLINT_DLL int fmpz_jacobi(const fmpz_t a, const fmpz_t p);
+
+FLINT_DLL int fmpz_kronecker(const fmpz_t a, const fmpz_t n);
 
 FLINT_DLL void fmpz_divides_mod_list(fmpz_t xstart, fmpz_t xstride,
                fmpz_t xlength, const fmpz_t a, const fmpz_t b, const fmpz_t n);

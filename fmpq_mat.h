@@ -6,7 +6,7 @@
     FLINT is free software: you can redistribute it and/or modify it under
     the terms of the GNU Lesser General Public License (LGPL) as published
     by the Free Software Foundation; either version 2.1 of the License, or
-    (at your option) any later version.  See <http://www.gnu.org/licenses/>.
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
 #ifndef FMPQ_MAT_H
@@ -300,6 +300,12 @@ FLINT_DLL int fmpq_mat_solve_dixon(fmpq_mat_t X, const fmpq_mat_t A, const fmpq_
 
 FLINT_DLL int fmpq_mat_solve_fmpz_mat_multi_mod(fmpq_mat_t X, const fmpz_mat_t A, const fmpz_mat_t B);
 FLINT_DLL int fmpq_mat_solve_multi_mod(fmpq_mat_t X, const fmpq_mat_t A, const fmpq_mat_t B);
+
+FLINT_DLL int fmpq_mat_can_solve_fmpz_mat_multi_mod(fmpq_mat_t X,
+                                        const fmpz_mat_t A, const fmpz_mat_t B);
+
+FLINT_DLL int fmpq_mat_can_solve_multi_mod(fmpq_mat_t X,
+                                        const fmpq_mat_t A, const fmpq_mat_t B);
 
 FLINT_DLL int fmpq_mat_solve_fmpz_mat(fmpq_mat_t X, const fmpz_mat_t A, const fmpz_mat_t B);
 FLINT_DLL int fmpq_mat_solve(fmpq_mat_t X, const fmpq_mat_t A, const fmpq_mat_t B);

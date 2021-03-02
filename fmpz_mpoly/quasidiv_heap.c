@@ -6,7 +6,7 @@
     FLINT is free software: you can redistribute it and/or modify it under
     the terms of the GNU Lesser General Public License (LGPL) as published
     by the Free Software Foundation; either version 2.1 of the License, or
-    (at your option) any later version.  See <http://www.gnu.org/licenses/>.
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
 #include "fmpz_mpoly.h"
@@ -62,17 +62,14 @@ slong _fmpz_mpoly_quasidiv_heap1(fmpz_t scale,
     next_loc = len3 + 4;   /* something bigger than heap can ever be */
     heap = (mpoly_heap1_s *) TMP_ALLOC((len3 + 1)*sizeof(mpoly_heap1_s));
     chain = (mpoly_heap_t *) TMP_ALLOC(len3*sizeof(mpoly_heap_t));
-    store = store_base = (slong *) TMP_ALLOC(2*len3*sizeof(mpoly_heap_t *));
+    store = store_base = (slong *) TMP_ALLOC(2*len3*sizeof(slong));
 
     /* space for flagged heap indicies */
     hind = (slong *) TMP_ALLOC(len3*sizeof(slong));
     for (i = 0; i < len3; i++)
         hind[i] = 1;
 
-    /* mask with high bit set in each field of exponent vector */
-    mask = 0;
-    for (i = 0; i < FLINT_BITS/bits; i++)
-        mask = (mask << bits) + (UWORD(1) << (bits - 1));
+    mask = mpoly_overflow_mask_sp(bits);
 
     /* insert (-1, 0, exp2[0]) into heap */
     x = chain + 0;
@@ -430,7 +427,7 @@ slong _fmpz_mpoly_quasidiv_heap(fmpz_t scale,
     next_loc = len3 + 4;   /* something bigger than heap can ever be */
     heap = (mpoly_heap_s *) TMP_ALLOC((len3 + 1)*sizeof(mpoly_heap_s));
     chain = (mpoly_heap_t *) TMP_ALLOC(len3*sizeof(mpoly_heap_t));
-    store = store_base = (slong *) TMP_ALLOC(2*len3*sizeof(mpoly_heap_t *));
+    store = store_base = (slong *) TMP_ALLOC(2*len3*sizeof(slong));
 
     /* array of exponents of N words each */
     exps = (ulong *) TMP_ALLOC(len3*N*sizeof(ulong));
@@ -449,10 +446,7 @@ slong _fmpz_mpoly_quasidiv_heap(fmpz_t scale,
     for (i = 0; i < len3; i++)
         hind[i] = 1;
 
-    /* mask with high bit set in each field of exponent vector */
-    mask = 0;
-    for (i = 0; i < FLINT_BITS/bits; i++)
-        mask = (mask << bits) + (UWORD(1) << (bits - 1));
+    mask = bits <= FLINT_BITS ? mpoly_overflow_mask_sp(bits) : 0;
 
     /* insert (-1, 0, exp2[0]) into heap */
     x = chain + 0;

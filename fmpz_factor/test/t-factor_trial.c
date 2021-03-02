@@ -6,7 +6,7 @@
     FLINT is free software: you can redistribute it and/or modify it under
     the terms of the GNU Lesser General Public License (LGPL) as published
     by the Free Software Foundation; either version 2.1 of the License, or
-    (at your option) any later version.  See <http://www.gnu.org/licenses/>.
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
@@ -53,15 +53,15 @@ void check(fmpz_t n)
 
     if (factor->num != factor2->num)
     {
-	flint_printf("ERROR: number of factors do not agree\n");
+        flint_printf("ERROR: number of factors do not agree\n");
 
-	flint_printf("n = ");
-	fmpz_print(n);
-	flint_printf("\n");
+	    flint_printf("n = ");
+	    fmpz_print(n);
+	    flint_printf("\n");
 
         flint_printf("factor_trial computed factors: ");
-	fmpz_factor_print(factor);
-	flint_printf("\n");
+	    fmpz_factor_print(factor);
+	    flint_printf("\n");
 
         flint_printf("factor_trial_range computed factors: ");
         fmpz_factor_print(factor2);
@@ -161,6 +161,25 @@ int main(void)
     check(x);
 
     mpz_clear(y1);
+
+    /* regression test */
+    {
+        fmpz_factor_t fac;
+        
+        fmpz_factor_init(fac);
+        
+        fmpz_set_str(x, "-27881013806671883810", 10);
+    
+        fmpz_factor_trial(fac, x, 0);
+
+        fmpz_factor_clear(fac);
+        fmpz_factor_init(fac);
+
+        fmpz_factor_trial(fac, x, 0);
+
+        fmpz_factor_clear(fac);
+    }
+    
 
     fmpz_clear(x);
 

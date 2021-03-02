@@ -77,6 +77,13 @@ Basic properties and manipulation
 
     Returns the number of columns in ``mat``.
 
+.. function:: void nmod_mat_zero(nmod_mat_t mat)
+
+    Sets all entries of the matrix ``mat`` to zero.
+
+.. function:: int nmod_mat_is_zero(nmod_mat_t mat)
+
+    Returns `1` if all entries of the matrix ``mat`` are zero.
 
 Window
 --------------------------------------------------------------------------------
@@ -255,9 +262,9 @@ Matrix-scalar arithmetic
     Sets `B = cA`, where the scalar `c` is assumed to be reduced
     modulo the modulus. Dimensions of `A` and `B` must be identical.
 
-.. function:: void nmod_mat_scalar_mul_add(nmod_mat_t dest, const nmod_mat_t X, const mp_limb_t b, const nmod_mat_t Y)
+.. function:: void nmod_mat_scalar_addmul_ui(nmod_mat_t dest, const nmod_mat_t X, const nmod_mat_t Y, const mp_limb_t b)
 
-    Sets `dest = X + bY`, where the scalar `c` is assumed to be reduced
+    Sets `dest = X + bY`, where the scalar `b` is assumed to be reduced
     modulo the modulus. Dimensions of dest, X and Y must be identical.
     dest can be aliased with X or Y.
 
@@ -271,7 +278,7 @@ Matrix multiplication
 --------------------------------------------------------------------------------
 
 
-.. function:: void nmod_mat_mul(nmod_mat_t C, nmod_mat_t A, nmod_mat_t B)
+.. function:: void nmod_mat_mul(nmod_mat_t C, const nmod_mat_t A, const nmod_mat_t B)
 
     Sets `C = AB`. Dimensions must be compatible for matrix multiplication.
     Aliasing is allowed. This function automatically chooses between classical
@@ -282,7 +289,7 @@ Matrix multiplication
    Sets ``D = A*B op C`` where ``op`` is ``+1`` for addition, ``-1`` for
    subtraction and ``0`` to ignore ``C``.
 
-.. function:: void nmod_mat_mul_classical(nmod_mat_t C, nmod_mat_t A, nmod_mat_t B)
+.. function:: void nmod_mat_mul_classical(nmod_mat_t C, const nmod_mat_t A, const nmod_mat_t B)
 
     Sets `C = AB`. Dimensions must be compatible for matrix multiplication.
     `C` is not allowed to be aliased with `A` or `B`. Uses classical
@@ -303,11 +310,15 @@ Matrix multiplication
 
     Multithreaded version of ``nmod_mat_mul_classical``.
 
-.. function:: void nmod_mat_mul_strassen(nmod_mat_t C, nmod_mat_t A, nmod_mat_t B)
+.. function:: void nmod_mat_mul_strassen(nmod_mat_t C, const nmod_mat_t A, const nmod_mat_t B)
 
     Sets `C = AB`. Dimensions must be compatible for matrix multiplication.
     `C` is not allowed to be aliased with `A` or `B`. Uses Strassen
     multiplication (the Strassen-Winograd variant).
+
+.. function:: int nmod_mat_mul_blas(nmod_mat_t C, const nmod_mat_t A, const nmod_mat_t B)
+
+    Tries to set `C = AB` using BLAS and returns `1` for success and `0` for failure. Dimensions must be compatible for matrix multiplication.
 
 .. function:: void nmod_mat_addmul(nmod_mat_t D, const nmod_mat_t C, const nmod_mat_t A, const nmod_mat_t B)
 
@@ -465,6 +476,31 @@ Nonsingular square solving
     Returns `1` if `A` has full rank; otherwise returns `0` and sets the
     elements of `X` to undefined values.
 
+    The matrix `A` must be square.
+
+.. function:: int nmod_mat_can_solve_inner(slong * rank, slong * perm, slong * pivots, nmod_mat_t X, const nmod_mat_t A, const nmod_mat_t B)
+
+    As for `nmod_mat_can_solve()` except that if `rank` is not `NULL` the
+    value it points to will be set to the rank of `A`. If `perm` is not `NULL`
+    then it must be a valid initialised permutation whose length is the number
+    of rows of `A`. After the function call it will be set to the row
+    permutation given by LU decomposition of `A`. If `pivots` is not `NULL`
+    then it must an initialised vector. Only the first `*rank` of these will be
+    set by the function call. They are set to the columns of the pivots chosen
+    by the LU decomposition of `A`.
+
+.. function:: int nmod_mat_can_solve(nmod_mat_t X, nmod_mat_t A, nmod_mat_t B)
+
+    Solves the matrix-matrix equation `AX = B` over `\mathbb{Z} / p \mathbb{Z}` where `p`
+    is the modulus of `X` which must be a prime number. `X`, `A`, and `B`
+    should have the same moduli.
+
+    Returns `1` if a solution exists; otherwise returns `0` and sets the
+    elements of `X` to zero. If more than one solution exists, one of the
+    valid solutions is given.
+
+    There are no restrictions on the shape of `A` and it may be singular.
+
 .. function:: int nmod_mat_solve_vec(mp_limb_t * x, nmod_mat_t A, mp_limb_t * b)
 
     Solves the matrix-vector equation `Ax = b` over `\mathbb{Z} / p \mathbb{Z}` where `p`
@@ -582,7 +618,6 @@ Transforms
 
 Characteristic polynomial
 --------------------------------------------------------------------------------
-
 
 .. function:: void nmod_mat_charpoly_danilevsky(nmod_poly_t p, const nmod_mat_t M)
 

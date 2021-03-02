@@ -297,6 +297,14 @@ Conversion
     ``in[0] + in[1]*X  + ... + in[in_len - 1]*X^(in_len - 1)``
     where ``X = 2^FLINT_BITS``. It is assumed that ``in_len > 0``.
 
+.. function:: void fmpz_set_signed_ui_array(fmpz_t out, const ulong * in, slong in_len)
+
+    Sets ``out`` to the integer represented in ``in[0], ..., in[in_len - 1]``
+    as a signed two's complement integer with ``in_len * FLINT_BITS`` bits.
+    It is assumed that ``in_len > 0``. The function operates as a call to
+    :func:`fmpz_set_ui_array` followed by a symmetric remainder modulo
+    ``2*(in_len*FLINT_BITS)``.
+
 .. function:: void fmpz_get_ui_array(ulong * out, slong out_len, const fmpz_t in)
 
     Assuming that the nonnegative integer ``in`` can be represented in the
@@ -425,11 +433,11 @@ Input and output
     Reads a multiprecision integer from the stream ``file``.  The
     format is raw binary format write by :func:`fmpz_out_raw`. 
     
-    In case of success, return a posivitive number, indicating number of bytes read.
+    In case of success, return a positive number, indicating number of bytes read.
     In case of failure 0.
 
     This function calls the ``mpz_inp_raw`` function in library gmp. So that it 
-    can read the raw data writen by ``mpz_inp_raw`` directly.
+    can read the raw data written by ``mpz_inp_raw`` directly.
     
 .. function:: int fmpz_print(fmpz_t x)
 
@@ -462,9 +470,9 @@ Input and output
 .. function:: size_t fmpz_out_raw( FILE *fout, const fmpz_t x )
 
     Writes the value `x` to ``file``.
-    The value is writen in raw binary format. The integer is written in 
+    The value is written in raw binary format. The integer is written in 
     portable format, with 4 bytes of size information, and that many bytes
-    of linbs. Both the size and the limbs are written in decreasing 
+    of limbs. Both the size and the limbs are written in decreasing 
     significance order (i.e., in big-endian).
 
     The output can be read with ``fmpz_inp_raw``.
@@ -603,8 +611,7 @@ Comparison
 
 .. function:: int fmpz_is_pm1(const fmpz_t f)
 
-    Returns `1` if `f` is equal to one or minus one, otherwise returns 
-    `0`.
+    Returns `1` if `f` is equal to one or minus one, otherwise returns `0`.
 
 .. function:: int fmpz_is_even(const fmpz_t f)
 
@@ -628,65 +635,42 @@ Basic arithmetic
     Sets `f_1` to the absolute value of `f_2`.
 
 .. function:: void fmpz_add(fmpz_t f, const fmpz_t g, const fmpz_t h)
+              void fmpz_add_ui(fmpz_t f, const fmpz_t g, ulong h)
+              void fmpz_add_si(fmpz_t f, const fmpz_t g, slong h)
 
     Sets `f` to `g + h`.
 
-.. function:: void fmpz_add_ui(fmpz_t f, const fmpz_t g, ulong x)
-
-    Sets `f` to `g + x` where `x` is an ``ulong``.
-
-.. function:: void fmpz_add_si(fmpz_t f, const fmpz_t g, slong x)
-
-    Sets `f` to `g + x` where `x` is an ``slong``.
-
 .. function:: void fmpz_sub(fmpz_t f, const fmpz_t g, const fmpz_t h)
+              void fmpz_sub_ui(fmpz_t f, const fmpz_t g, ulong h)
+              void fmpz_sub_si(fmpz_t f, const fmpz_t g, slong h)
 
     Sets `f` to `g - h`.
 
-.. function:: void fmpz_sub_ui(fmpz_t f, const fmpz_t g, ulong x)
-
-    Sets `f` to `g - x` where `x` is an ``ulong``.
-
-.. function:: void fmpz_sub_si(fmpz_t f, const fmpz_t g, slong x)
-
-    Sets `f` to `g - x` where `x` is an ``slong``.
-
 .. function:: void fmpz_mul(fmpz_t f, const fmpz_t g, const fmpz_t h)
+              void fmpz_mul_ui(fmpz_t f, const fmpz_t g, ulong h)
+              void fmpz_mul_si(fmpz_t f, const fmpz_t g, slong h)
 
     Sets `f` to `g \times h`.
 
-.. function:: void fmpz_mul_si(fmpz_t f, const fmpz_t g, slong x)
-
-    Sets `f` to `g \times x` where `x` is a ``slong``.
-
-.. function:: void fmpz_mul_ui(fmpz_t f, const fmpz_t g, ulong x)
-
-    Sets `f` to `g \times x` where `x` is an ``ulong``.
-
 .. function:: void fmpz_mul2_uiui(fmpz_t f, const fmpz_t g, ulong x, ulong y)
 
-    Sets `f` to `g \times x \times y` where `x` and `y` are of type
-    ``ulong``.
+    Sets `f` to `g \times x \times y` where `x` and `y` are of type ``ulong``.
 
 .. function:: void fmpz_mul_2exp(fmpz_t f, const fmpz_t g, ulong e)
 
     Sets `f` to `g \times 2^e`.
 
 .. function:: void fmpz_addmul(fmpz_t f, const fmpz_t g, const fmpz_t h)
+              void fmpz_addmul_ui(fmpz_t f, const fmpz_t g, ulong h)
+              void fmpz_addmul_si(fmpz_t f, const fmpz_t g, slong h)
 
     Sets `f` to `f + g \times h`.
 
-.. function:: void fmpz_addmul_ui(fmpz_t f, const fmpz_t g, ulong x)
-
-    Sets `f` to `f + g \times x` where `x` is an ``ulong``.
-
 .. function:: void fmpz_submul(fmpz_t f, const fmpz_t g, const fmpz_t h)
+              void fmpz_submul_ui(fmpz_t f, const fmpz_t g, ulong h)
+              void fmpz_submul_si(fmpz_t f, const fmpz_t g, slong h)
 
     Sets `f` to `f - g \times h`.
-
-.. function:: void fmpz_submul_ui(fmpz_t f, const fmpz_t g, ulong x)
-
-    Sets `f` to `f - g \times x` where `x` is an ``ulong``.
 
 .. function:: void fmpz_fmma(fmpz_t f, const fmpz_t a, const fmpz_t b, const fmpz_t c, const fmpz_t d)
 
@@ -1089,10 +1073,13 @@ Modular arithmetic
 
     Sets `f` to `-g \pmod{h}`, assuming `g` is reduced modulo `h`.
 
-.. function:: int fmpz_jacobi(const fmpz_t a, const fmpz_t p)
+.. function:: int fmpz_jacobi(const fmpz_t a, const fmpz_t n)
 
-    Computes the Jacobi symbol of `a` modulo `p`, where `p` is a prime
-    and `a` is reduced modulo `p`.
+    Computes the Jacobi symbol `\left(\frac{a}{n}\right)` for any `a` and odd positive `n`.
+
+.. function:: int fmpz_kronecker(const fmpz_t a, const fmpz_t n)
+
+    Computes the Kronecker symbol `\left(\frac{a}{n}\right)` for any `a` and any `n`.
 
 .. function:: void fmpz_divides_mod_list(fmpz_t xstart, fmpz_t xstride, fmpz_t xlength, const fmpz_t a, const fmpz_t b, const fmpz_t n)
 
@@ -1272,12 +1259,12 @@ The ``fmpz_multi_crt`` class is similar to ``fmpz_multi_CRT_ui`` except that it 
 
 .. function:: void fmpz_multi_crt_init(fmpz_multi_crt_t CRT)
 
-    Initialize ``CRT`` for chinese remaindering.
+    Initialize ``CRT`` for Chinese remaindering.
 
 .. function:: int fmpz_multi_crt_precompute(fmpz_multi_crt_t CRT, const fmpz * moduli, slong len)
               int fmpz_multi_crt_precompute_p(fmpz_multi_crt_t CRT, const fmpz * const * moduli, slong len)
 
-    Configure ``CRT`` for repeated chinese remaindering of ``moduli``. The number of moduli, ``len``, should be positive.
+    Configure ``CRT`` for repeated Chinese remaindering of ``moduli``. The number of moduli, ``len``, should be positive.
     A return of ``0`` indicates that the compilation failed and future
     calls to :func:`fmpz_crt_precomp` will leave the output undefined.
     A return of ``1`` indicates that the compilation was successful, which occurs if and only if either (1) ``len == 1`` and ``modulus + 0`` is nonzero, or (2) no modulus is `0,1,-1` and all moduli are pairwise relatively prime.
@@ -1360,7 +1347,7 @@ Primality testing
 
     Next we compute `N/B` and find the next pseudosquare `L_p` above
     this value, using a static table as per
-    http://oeis.org/A002189/b002189.txt.
+    https://oeis.org/A002189/b002189.txt.
 
     As noted in the text, if `p` is prime then Step 3 will pass. This
     test rejects many composites, and so by this time we suspect

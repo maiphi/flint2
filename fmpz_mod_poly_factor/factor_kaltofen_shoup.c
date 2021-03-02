@@ -1,12 +1,13 @@
 /*
     Copyright (C) 2012 Lina Kulakova
+    Copyright (C) 2020 Daniel Schultz
 
     This file is part of FLINT.
 
     FLINT is free software: you can redistribute it and/or modify it under
     the terms of the GNU Lesser General Public License (LGPL) as published
     by the Free Software Foundation; either version 2.1 of the License, or
-    (at your option) any later version.  See <http://www.gnu.org/licenses/>.
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
 #include <math.h>
@@ -15,63 +16,68 @@
 
 void
 fmpz_mod_poly_factor_kaltofen_shoup(fmpz_mod_poly_factor_t res,
-                                    const fmpz_mod_poly_t poly)
+                          const fmpz_mod_poly_t poly, const fmpz_mod_ctx_t ctx)
 {
-    fmpz_mod_poly_t v;
-    fmpz_mod_poly_factor_t sq_free, dist_deg;
-    slong i, j, k, l, res_num, dist_deg_num;
-    slong *degs;
+    slong i, j, k;
+    slong num_threads = flint_get_num_threads();
+    fmpz_mod_poly_t t, DDxp, EDxp;
+    fmpz_mod_poly_factor_t SF, DD, ED;
 
-    fmpz_mod_poly_init(v, &poly->p);
+    res->num = 0;
 
-    fmpz_mod_poly_make_monic(v, poly);
+    fmpz_mod_poly_init(t, ctx);
+    fmpz_mod_poly_make_monic(t, poly, ctx);
     
     if (poly->length <= 2)
     {
-        fmpz_mod_poly_factor_insert (res, v, 1);
-        fmpz_mod_poly_clear (v);        
+        fmpz_mod_poly_factor_insert(res, t, 1, ctx);
+        fmpz_mod_poly_clear(t, ctx);
         return;        
     }
-    
-    if (!(degs = flint_malloc(fmpz_mod_poly_degree(poly) * sizeof(slong))))
+
+    fmpz_mod_poly_init(DDxp, ctx);
+    fmpz_mod_poly_init(EDxp, ctx);
+    fmpz_mod_poly_factor_init(SF, ctx);
+    fmpz_mod_poly_factor_init(DD, ctx);
+    fmpz_mod_poly_factor_init(ED, ctx);
+
+    fmpz_mod_poly_factor_squarefree(SF, t, ctx);
+    for (i = 0; i < SF->num; i++)
     {
-        flint_printf("Exception (fmpz_mod_poly_factor_kaltofen_shoup): \n");
-        flint_printf("Not enough memory.\n");
-        flint_abort();
-    }
+        fmpz_mod_poly_struct * f = SF->poly + i;
 
-    /* compute squarefree factorisation */
-    fmpz_mod_poly_factor_init(sq_free);
-    fmpz_mod_poly_factor_squarefree(sq_free, v);
+        fmpz_mod_poly_reverse(t, f, f->length, ctx);
+        fmpz_mod_poly_inv_series_newton(t, t, f->length, ctx);
+        fmpz_mod_poly_powmod_x_fmpz_preinv(DDxp, fmpz_mod_ctx_modulus(ctx), f, t, ctx);
 
-    /* compute distinct-degree factorisation */
-    fmpz_mod_poly_factor_init(dist_deg);
-    for (i = 0; i < sq_free->num; i++)
-    {
-        dist_deg_num = dist_deg->num;
-
-        if ((flint_get_num_threads() > 1) &&
-            ((sq_free->poly + i)->length > (1024*flint_get_num_threads())/4))
-            fmpz_mod_poly_factor_distinct_deg_threaded(dist_deg,
-                                                   sq_free->poly + i,
-                                                   &degs);
+        /*
+            TODO Since there is a fair amount of code duplicated in the
+            threaded version, the two functions should be combined into one.
+        */
+        if (num_threads > 1 && f->length > 256*num_threads)
+            fmpz_mod_poly_factor_distinct_deg_threaded_with_frob(DD, f, t, DDxp, ctx);
         else
-            fmpz_mod_poly_factor_distinct_deg(dist_deg, sq_free->poly + i,
-                                              &degs);
+            fmpz_mod_poly_factor_distinct_deg_with_frob(DD, f, t, DDxp, ctx);
 
-        /* compute equal-degree factorisation */
-        for (j = dist_deg_num, l = 0; j < dist_deg->num; j++, l++)
+        for (j = 0; j < DD->num; j++)
         {
-            res_num = res->num;
-
-            fmpz_mod_poly_factor_equal_deg(res, dist_deg->poly + j, degs[l]);
-            for (k = res_num; k < res->num; k++)
-                res->exp[k] = fmpz_mod_poly_remove(v, res->poly + k);
+            fmpz_mod_poly_divrem(t, EDxp, DDxp, DD->poly + j, ctx);
+            fmpz_mod_poly_factor_equal_deg_with_frob(ED, DD->poly + j,
+                                                        DD->exp[j], EDxp, ctx);
+            fmpz_mod_poly_factor_fit_length(res, res->num + ED->num, ctx);
+            for (k = 0; k < ED->num; k++)
+            {
+                fmpz_mod_poly_swap(res->poly + res->num, ED->poly + k, ctx);
+                res->exp[res->num] = SF->exp[i];
+                res->num++;
+            }
         }
     }
 
-    flint_free(degs);
-    fmpz_mod_poly_clear(v);
-    fmpz_mod_poly_factor_clear(dist_deg);
-    fmpz_mod_poly_factor_clear(sq_free);
+    fmpz_mod_poly_clear(t, ctx);
+    fmpz_mod_poly_clear(DDxp, ctx);
+    fmpz_mod_poly_clear(EDxp, ctx);
+    fmpz_mod_poly_factor_clear(SF, ctx);
+    fmpz_mod_poly_factor_clear(DD, ctx);
+    fmpz_mod_poly_factor_clear(ED, ctx);
 }

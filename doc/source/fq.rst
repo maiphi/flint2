@@ -62,13 +62,12 @@ Context Management
     Assumes that the string ``var`` is a null-terminated string
     of length at least one.
 
-.. function:: void fq_ctx_init_modulus(fq_ctx_t ctx, fmpz_mod_poly_t modulus, const char *var)
+.. function:: void fq_ctx_init_modulus(fq_ctx_t ctx, const fmpz_mod_poly_t modulus, const fmpz_mod_ctx_t ctxp, const char *var)
 
     Initialises the context for given ``modulus`` with name
     ``var`` for the generator.
 
-    Assumes that ``modulus`` is an irreducible polynomial over
-    `\mathbf{F}_{p}`.
+    Assumes that ``modulus`` is an irreducible polynomial over the finite field `\mathbf{F}_{p}` in ``ctxp``.
 
     Assumes that the string ``var`` is a null-terminated string
     of length at least one.
@@ -337,6 +336,10 @@ Randomisation
 .. function:: void fq_rand(fq_t rop, flint_rand_t state, const fq_ctx_t ctx)
 
     Generates a high quality random element of `\mathbf{F}_q`.
+
+.. function:: void fq_rand_not_zero(fq_t rop, flint_rand_t state, const fq_ctx_t ctx)
+
+    Generates a high quality non-zero random element of `\mathbf{F}_q`.
 
 
 Assignments and conversions

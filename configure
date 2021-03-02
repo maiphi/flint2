@@ -52,10 +52,13 @@ FLINT_SOLIB=0
 # 2.6.0 => 14.0.0
 # 2.6.1 => 14.0.1
 # 2.6.2 => 14.0.2
+# 2.6.3 => 14.0.3
+# 2.7.0 => 15.0.0
+# 2.7.1 =? 15.0.1
 
-FLINT_MAJOR=14
+FLINT_MAJOR=15
 FLINT_MINOR=0
-FLINT_PATCH=2
+FLINT_PATCH=0
 
 usage()
 {
@@ -307,7 +310,7 @@ if [ "$WANT_BLAS" = "1" ]; then
    EXTRA_LIB_DIRS="${EXTRA_LIB_DIRS} ${BLAS_LIB_DIR}"
    EXTRA_LIBS="${EXTRA_LIBS} openblas"
 fi
-CONFIG_BLAS="#define HAVE_BLAS ${WANT_BLAS}"
+CONFIG_BLAS="#define FLINT_USES_BLAS ${WANT_BLAS}"
 
 if [ "$WANT_GC" = "1" ]; then
    if [ -d "${GC_DIR}" ]; then
@@ -322,7 +325,7 @@ if [ "$WANT_GC" = "1" ]; then
    EXTRA_LIB_DIRS="${EXTRA_LIB_DIRS} ${GC_LIB_DIR}"
    EXTRA_LIBS="${EXTRA_LIBS} gc"
 fi
-CONFIG_GC="#define HAVE_GC ${WANT_GC}"
+CONFIG_GC="#define FLINT_USES_GC ${WANT_GC}"
 
 # defaults for CC, CXX and AR
 
@@ -557,7 +560,7 @@ $CC build/test-popcnt.c -o ./build/test-popcnt > /dev/null 2>&1
 if [ $? -eq 0 ]; then
    printf "%s\n" "yes"
    echo "yes" >> config.log
-   CONFIG_POPCNT_INTRINSICS="#define POPCNT_INTRINSICS"
+   CONFIG_POPCNT_INTRINSICS="#define FLINT_USES_POPCNT"
 
    if [ "$MACHINE" = "x86_64" ]; then
       MSG="Testing native popcount..."
@@ -626,7 +629,7 @@ fi
 
 #test support for thread-local storage
 
-CONFIG_TLS="#define HAVE_TLS 0"
+CONFIG_TLS="#define FLINT_USES_TLS 0"
 
 if [ "$TLS" = "1" ]; then
    mkdir -p build
@@ -641,7 +644,7 @@ if [ "$TLS" = "1" ]; then
       if [ $? -eq 0 ]; then
          printf "%s\n" "yes"
 	 echo "yes" >> config.log
-         CONFIG_TLS="#define HAVE_TLS 1"
+         CONFIG_TLS="#define FLINT_USES_TLS 1"
       else
          printf "%s\n" "no"
 	 echo "no" >> config.log
@@ -657,7 +660,7 @@ fi
 
 #fenv configuration
 
-CONFIG_FENV="#define HAVE_FENV 0"
+CONFIG_FENV="#define FLINT_USES_FENV 0"
 
 mkdir -p build
 MSG="Testing fenv..."
@@ -670,7 +673,7 @@ echo "#endif" >> build/test-fenv.h
 if ($CC -E build/test-fenv.h > /dev/null 2>&1) then
     printf "%s\n" "yes"
     echo "yes" >> config.log
-    CONFIG_FENV="#define HAVE_FENV 1"
+    CONFIG_FENV="#define FLINT_USES_FENV 1"
 else
     printf "%s\n" "no"
     echo "no" >> config.log
@@ -679,11 +682,11 @@ rm -f build/test-fenv.h
 
 #pthread configuration
 
-CONFIG_PTHREAD="#define HAVE_PTHREAD ${PTHREAD}"
+CONFIG_PTHREAD="#define FLINT_USES_PTHREAD ${PTHREAD}"
 
 #cpu_set_t configuration
 
-CONFIG_CPU_SET_T="#define HAVE_CPU_SET_T 0"
+CONFIG_CPU_SET_T="#define FLINT_USES_CPUSET 0"
 
 mkdir -p build
 MSG="Testing cpu_set_t..."
@@ -691,13 +694,14 @@ printf "%s" "$MSG"
 printf "%s" "$MSG" >> config.log
 echo "#define _GNU_SOURCE
 #include <sched.h>
-int main(){cpu_set_t s;CPU_ZERO(&s);return 0;}" > build/test-cpu_set_t.c
-$CC build/test-cpu_set_t.c -o ./build/test-cpu_set_t > /dev/null 2>&1
+#include <pthread.h>
+int main(){cpu_set_t s;CPU_ZERO(&s); pthread_getaffinity_np(pthread_self(), sizeof(cpu_set_t), 0); return 0;}" > build/test-cpu_set_t.c
+$CC build/test-cpu_set_t.c -lpthread -o ./build/test-cpu_set_t > /dev/null 2>&1
 if [ $? -eq 0 ]; then
     rm -f build/test-cpu_set_t
     printf "%s\n" "yes"
     echo "yes" >> config.log
-    CONFIG_CPU_SET_T="#define HAVE_CPU_SET_T 1"
+    CONFIG_CPU_SET_T="#define FLINT_USES_CPUSET 1"
 else
     printf "%s\n" "no"
     echo "no" >> config.log
@@ -758,7 +762,7 @@ echo "$CONFIG_PTHREAD" >> flint-config.h
 echo "$CONFIG_GC" >> flint-config.h
 echo "$CONFIG_CPU_SET_T" >> flint-config.h
 echo "#define FLINT_REENTRANT $REENTRANT" >> flint-config.h
-echo "#define WANT_ASSERT $ASSERT" >> flint-config.h
+echo "#define FLINT_WANT_ASSERT $ASSERT" >> flint-config.h
 if [ "$FLINT_DLL" = "1" ]; then
    echo "#ifdef FLINT_USE_DLL" >> flint-config.h
    echo "#define FLINT_DLL __declspec(dllimport)" >> flint-config.h

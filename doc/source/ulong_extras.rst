@@ -90,15 +90,21 @@ Basic arithmetic
 
 .. function:: ulong n_flog(ulong n, ulong b)
 
-    Returns `\lfloor\log_b x\rfloor`.
+    Returns `\lfloor\log_b n\rfloor`.
 
-    Assumes that `x \geq 1` and `b \geq 2`.
+    Assumes that `n \geq 1` and `b \geq 2`.
 
 .. function:: ulong n_clog(ulong n, ulong b)
 
-    Returns `\lceil\log_b x\rceil`.
+    Returns `\lceil\log_b n\rceil`.
 
-    Assumes that `x \geq 1` and `b \geq 2`.
+    Assumes that `n \geq 1` and `b \geq 2`.
+
+.. function:: ulong n_clog_2exp(ulong n, ulong b)
+
+    Returns `\lceil\log_b 2^n\rceil`.
+
+    Assumes that `b \geq 2`.
 
 
 Miscellaneous
@@ -315,7 +321,7 @@ Greatest common divisor
     Returns the greatest common divisor `g` of `x` and `y`. No assumptions
     are made about the values `x` and `y`.
 
-    The algorithm is a slight embelishment of the Euclidean algorithm
+    The algorithm is a slight embellishment of the Euclidean algorithm
     which uses some branches to avoid most divisions.
 
     One wishes to compute the quotient and remainder of `u_3 / v_3` without 
@@ -382,12 +388,7 @@ Jacobi and Kronecker symbols
 
 .. function:: int n_jacobi(mp_limb_signed_t x, ulong y)
 
-    Computes the Jacobi symbol of `x \bmod{y}`.  Assumes that `y` is positive 
-    and odd, and for performance reasons that `\gcd(x, y) = 1`.
-
-    This is just a straightforward application of the law of quadratic
-    reciprocity. For performance, divisions are replaced with some 
-    comparisons and subtractions where possible.
+    Computes the Jacobi symbol `\left(\frac{x}{y}\right)` for any x and odd `y`.
 
 .. function:: int n_jacobi_unsigned(ulong x, ulong y)
 
@@ -718,7 +719,7 @@ Primality testing
     factoring.
 
     See 
-    http://mathworld.wolfram.com/PocklingtonsTheorem.html
+    https://mathworld.wolfram.com/PocklingtonsTheorem.html
     for a description of the algorithm.
 
 .. function:: int n_is_prime_pseudosquare(ulong n)
@@ -731,7 +732,7 @@ Primality testing
 
     Next we compute `N/B` and find the next pseudosquare `L_p` above
     this value, using a static table as per
-    http://oeis.org/A002189/b002189.txt .
+    https://oeis.org/A002189/b002189.txt .
 
     As noted in the text, if `p` is prime then Step 3 will pass. This
     test rejects many composites, and so by this time we suspect
@@ -781,7 +782,7 @@ Primality testing
     than `s`.
 
     A description of strong probable primes is given here:
-    http://mathworld.wolfram.com/StrongPseudoprime.html
+    https://mathworld.wolfram.com/StrongPseudoprime.html
 
 .. function:: int n_is_strong_probabprime2_preinv(ulong n, ulong ninv, ulong a, ulong d)
 
@@ -795,7 +796,7 @@ Primality testing
     or `(a^d)^{2^r} = -1 \pmod n` for some `r` less than `s`.
 
     A description of strong probable primes is given here:
-    http://mathworld.wolfram.com/StrongPseudoprime.html
+    https://mathworld.wolfram.com/StrongPseudoprime.html
 
 .. function:: int n_is_probabprime_fermat(ulong n, ulong i)
 
@@ -947,7 +948,7 @@ Square root and perfect power testing
     This function uses the Newton iteration method to calculate the nth root of
     a number.
     First approximation is calculated by an algorithm mentioned in this 
-    article :  http://en.wikipedia.org/wiki/Fast_inverse_square_root . 
+    article :  https://en.wikipedia.org/wiki/Fast_inverse_square_root . 
     Instead of the inverse square root, the nth root is calculated.
     
     Returns the integer part of ``n ^ 1/root``. Remainder is set as
@@ -957,7 +958,7 @@ Square root and perfect power testing
     
     This function returns the integer truncation of the cube root of `n`.
     First approximation is calculated by an algorithm mentioned in this 
-    article : http://en.wikipedia.org/wiki/Fast_inverse_square_root .
+    article : https://en.wikipedia.org/wiki/Fast_inverse_square_root .
     Instead of the inverse sqare root, the cube root is calculated.
     This functions uses different algorithms to calculate the cube root,
     depending upon the size of `n`. For numbers greater than `2^46`, it uses
@@ -1107,7 +1108,7 @@ Factorisation
     of SQUFOF. Simply set ``iters`` to `` WORD(0)`` for maximum 
     persistence.
 
-    The version of SQUFOF imlemented here is as described by Gower 
+    The version of SQUFOF implemented here is as described by Gower 
     and Wagstaff [GowWag2008]_.
 
 
@@ -1229,7 +1230,7 @@ Factorisation
     Pollard Rho algorithm (with Brent modification) for integer factorization. 
     Assumes that the `n` is not prime. `factor` is set as the factor if found. 
     It is not assured that the factor found will be prime. Does not compute the complete 
-    factorization, just one factor. Returns 1 if factorization is successfull 
+    factorization, just one factor. Returns 1 if factorization is successful 
     (non trivial factor is found), else returns 0. Assumes `n` is normalized,
     (shifted by normbits bits), and takes as input a precomputed inverse of `n` as 
     computed by :func:`n_preinvert_limb`. `ai` and `xi` should also be shifted
@@ -1240,12 +1241,12 @@ Factorisation
     cycle.
 
     The algorithm used is a modification of the original Pollard Rho algorithm,
-    suggested by Richard Brent in the paper, availible at
-    http://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf
+    suggested by Richard Brent in the paper, available at
+    https://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf
 
 .. function:: int n_factor_pollard_brent(mp_limb_t *factor, flint_rand_t state, mp_limb_t n_in, mp_limb_t max_tries, mp_limb_t max_iters)
 
-    Pollard Rho algorithm, modified as suggested by Richar Brent. Makes a call to 
+    Pollard Rho algorithm, modified as suggested by Richard Brent. Makes a call to 
     :func:`n_factor_pollard_brent_single`. The input parameters ai and xi for
     :func:`n_factor_pollard_brent_single` are selected at random. 
 

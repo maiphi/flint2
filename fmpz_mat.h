@@ -7,7 +7,7 @@
     FLINT is free software: you can redistribute it and/or modify it under
     the terms of the GNU Lesser General Public License (LGPL) as published
     by the Free Software Foundation; either version 2.1 of the License, or
-    (at your option) any later version.  See <http://www.gnu.org/licenses/>.
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
 #ifndef FMPZ_MAT_H
@@ -394,6 +394,8 @@ FLINT_DLL void fmpz_mat_det_modular_given_divisor(fmpz_t det, const fmpz_mat_t A
         const fmpz_t d, int proved);
 
 FLINT_DLL void fmpz_mat_det_bound(fmpz_t bound, const fmpz_mat_t A);
+FLINT_DLL void fmpz_mat_det_bound_nonzero(fmpz_t bound, const fmpz_mat_t A);
+
 FLINT_DLL void fmpz_mat_det_divisor(fmpz_t d, const fmpz_mat_t A);
 
 /* Transforms */
@@ -501,11 +503,15 @@ _fmpz_mat_solve_dixon_den(fmpz_mat_t X, fmpz_t den,
 
 FLINT_DLL int
 fmpz_mat_solve_dixon_den(fmpz_mat_t X, fmpz_t den,
-		                      const fmpz_mat_t A, const fmpz_mat_t B);
+		                              const fmpz_mat_t A, const fmpz_mat_t B);
 
 FLINT_DLL int
 fmpz_mat_solve_multi_mod_den(fmpz_mat_t X, fmpz_t den,
-	                              const fmpz_mat_t A, const fmpz_mat_t B);
+	                                  const fmpz_mat_t A, const fmpz_mat_t B);
+
+FLINT_DLL int
+fmpz_mat_can_solve_multi_mod_den(fmpz_mat_t X, fmpz_t den,
+                                      const fmpz_mat_t A, const fmpz_mat_t B);
 
 /* Nullspace ****************************************************************/
 
