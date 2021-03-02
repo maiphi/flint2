@@ -1,5 +1,5 @@
 
-src_fmpz_mod = files(['add.c', 'ctx_clear.c', 'ctx_init.c', 'discrete_log_pohlig_hellman.c', 'divides.c', 'inlines.c', 'inv.c', 'is_canonical.c', 'mul.c', 'neg.c', 'next_smooth_prime.c', 'pow_fmpz.c', 'pow_ui.c', 'set_modulus.c', 'sub.c'])
+src_fmpz_mod = files(['add.c', 'add_fmpz.c', 'addmul.c', 'ctx_clear.c', 'ctx_init.c', 'ctx_init_ui.c', 'discrete_log_pohlig_hellman.c', 'divides.c', 'equal_fmpz.c', 'inlines.c', 'inv.c', 'is_canonical.c', 'is_invertible.c', 'mul.c', 'mul_fmpz.c', 'neg.c', 'next_smooth_prime.c', 'pow_fmpz.c', 'pow_ui.c', 'rand.c', 'set_fmpz.c', 'set_modulus.c', 'set_modulus_ui.c', 'sub.c', 'sub_fmpz.c'])
 
 headers += files([])
 

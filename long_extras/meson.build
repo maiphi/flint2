@@ -1,5 +1,5 @@
 
-src_long_extras = files(['inlines.c', 'randint.c', 'randtest.c', 'sizeinbase.c'])
+src_long_extras = files(['inlines.c', 'kronecker.c', 'randint.c', 'randtest.c', 'sizeinbase.c'])
 
 headers += files([])
 

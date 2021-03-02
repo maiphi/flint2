@@ -13,9 +13,14 @@ build_dirs = [
     'padic_mat', 'qadic', 'fq', 'fq_vec', 'fq_mat', 'fq_poly', 'fq_poly_factor',
     'fq_nmod', 'fq_nmod_vec', 'fq_nmod_mat', 'fq_nmod_poly',
     'fq_nmod_poly_factor', 'fq_zech', 'fq_zech_vec', 'fq_zech_mat',
-    'fq_zech_poly', 'fq_zech_poly_factor', 'thread_pool', 'fmpz_mod', 'mpoly',
-    'fmpz_mpoly', 'fmpq_mpoly', 'nmod_mpoly', 'fq_nmod_mpoly', 'fmpz_mod_mpoly',
-    'flintxx']
+    'fq_zech_poly', 'fq_zech_poly_factor', 'thread_pool', 'fmpz_mod',
+    'fmpz_mod_vec', 'n_poly', 'mpoly', 'fmpz_mpoly', 'fmpq_mpoly', 'nmod_mpoly',
+    'fq_nmod_mpoly', 'fmpz_mod_mpoly', 'fmpz_mpoly_factor', 'fmpq_mpoly_factor',
+    'nmod_mpoly_factor', 'fmpz_mod_mpoly_factor', 'fq_nmod_mpoly_factor',
+    'fq_zech_mpoly', 'fq_zech_mpoly_factor', 'flintxx']
+
+# Not built by CMake build system:
+# ['fq_embed', 'fq_embed_templates', 'fq_nmod_embed', 'fq_zech_embed']
 
 template_dirs = [
     'fq_vec_templates', 'fq_mat_templates', 'fq_poly_templates',
@@ -85,7 +90,6 @@ project(
   default_options : [
     'c_std=c11',
     'buildtype=release',
-    'default_library=both',
     'warning_level=1'])
 
 # warning_level=0 doesn't exist in old Meson versions
